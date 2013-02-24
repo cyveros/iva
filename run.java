@@ -47,7 +47,11 @@ public class run {
 		std = Math.sqrt(std);
 		
 		// next step to filter the pixel into black, white, grey
-		
+		for(int i = 0; i < h; i++){
+			for (int j = 0; j < w; j++){
+				
+			}
+		}
 		System.out.println("standard deviation\t" + std);
 	}
 }

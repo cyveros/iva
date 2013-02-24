@@ -46,6 +46,8 @@ public class run {
 		
 		std = Math.sqrt(std);
 		
+		// next step to filter the pixel into black, white, grey
+		
 		System.out.println("standard deviation\t" + std);
 	}
 }

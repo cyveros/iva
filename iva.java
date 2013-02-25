@@ -1,88 +1,134 @@
-/*
- * Copyright (c) 1995, 2008, Oracle and/or its affiliates. All rights reserved.
- *
- * Redistribution and use in source and binary forms, with or without
- * modification, are permitted provided that the following conditions
- * are met:
- *
- *   - Redistributions of source code must retain the above copyright
- *     notice, this list of conditions and the following disclaimer.
- *
- *   - Redistributions in binary form must reproduce the above copyright
- *     notice, this list of conditions and the following disclaimer in the
- *     documentation and/or other materials provided with the distribution.
- *
- *   - Neither the name of Oracle or the names of its
- *     contributors may be used to endorse or promote products derived
- *     from this software without specific prior written permission.
- *
- * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
- * IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
- * THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
- * PURPOSE ARE DISCLAIMED.  IN NO EVENT SHALL THE COPYRIGHT OWNER OR
- * CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
- * EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
- * PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
- * PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
- * LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
- * NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
- * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
- */ 
-
-
 import java.awt.*;
 import java.awt.event.*;
 import java.awt.image.*;
 import java.io.*;
 import javax.imageio.*;
-import javax.swing.*;
+import java.math.*;
 
 /**
  * This class demonstrates how to load an Image from an external file
  */
-public class iva extends Component {
+public class iva {
           
-    BufferedImage img;
-
-    public void paint(Graphics g) {
-        g.drawImage(img, 0, 0, null);
-    }
-
-    public LoadImageApp() {
-       try {
-           img = ImageIO.read(new File("strawberry.jpg"));
-       } catch (IOException e) {
-       }
-
-    }
-
-    public Dimension getPreferredSize() {
-        if (img == null) {
-             return new Dimension(100,100);
-        } else {
-           return new Dimension(img.getWidth(null), img.getHeight(null));
-       }
-    }
-
-    public static void main(String[] args) {
+    private BufferedImage in, out;
+    private int width, height;
+    private double numberOfPixels;
     
-	String option = args[0];
-	String files = args[1];
+    private double mean = 0, std = 0;
+    private final int white = 0xFFFFFF, black = 0, grey = 0x808080;
+    private final double upper = 1.25, lower = 0.75;
+    
+    public iva(String imgPath){
+		try {
+			in = ImageIO.read(new File(imgPath));
+			getProperties();
+			
+		} catch (IOException e){
+			e.printStackTrace();
+		}
+	}
+    
+    public iva(BufferedImage img){
+		this.in = img;
+		getProperties();
+	}
+	
+	public void createOuputImage(){
+		out = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+	}
+	
+	public void computeMean(){
+		for(int i = 0; i < width; i++)
+			for (int j = 0; j < height; j++)
+				mean += (double)getAlphalessRGB(i, j) / numberOfPixels;
+	}
+	
+	// computeMean() must be called before computing standard deviation
+	public void computeStandardDeviation(){
+		for(int i = 0; i < width; i++)
+			for (int j = 0; j < height; j++)
+				std += Math.pow((double)getAlphalessRGB(i, j) - mean, 2) / numberOfPixels;
+				
+		std = Math.sqrt(std);
+	}
+	
+	public int getAlphalessRGB(int x, int y){
+		return in.getRGB(x, y) & 0xFFFFFF;
+	}
+	
+	public int getHeight(){
+		return height;
+	}
 	
 	
+	
+	public void getProperties(){
+		width = in.getWidth();
+		height = in.getHeight();
+		
+		numberOfPixels = width * height;
+	}
+	
+	public int getWidth(){
+		return width;
+	}
+	
+	public void gradientSmoother(){
+		// assume mean and std is computed
+		int color;
+		
+		for(int i = 0; i < width; i++){
+			for (int j = 0; j < height; j++){
+				color = getAlphalessRGB(i, j);
+				
+				if ((double)color > mean + (double)upper * std){
+					setColor(i, j, white);
+					//System.out.println("color:\t" + color + ", compared:\t" + (mean + (double)white * std) + ", white");
+				}else if ((double)color < mean - (double)lower * std){
+					setColor(i, j, black);
+					//System.out.println("color:\t" + color + ", compared:\t" + (mean - (double)black * std) + ", black");
+				}else{
+					setColor(i, j, grey);
+					//System.out.println("color:\t" + color + ", compared:\t" + (mean + (double)black * std) + "," + (mean - (double)black * std) + "  grey");
+				}
+			}
+		}
+	}
+	
+	public void noiseReduction(){
+		
+	}
+	
+	public void outputImage(String fileName, String type){
+		try {
+			File f = new File(fileName);
+			ImageIO.write(out, type, f);
+		} catch (IOException e){
+			e.printStackTrace();
+		} 
+	}
+	
+	public void output(){
+		outputImage("o_test.png", "PNG");
+	}
+	
+	public void preComputation(){
+		// pre computation steps
+		computeMean();
+		computeStandardDeviation();
+		// create output image
+		createOuputImage();
+	}
+	
+	public void setColor(int x, int y, int color){
+		out.setRGB(x, y, 0xFF000000 | color);
+	}
+	
+	public void setImage(BufferedImage img){
+		this.in = img;
+		getProperties();
+	}
 
-//         JFrame f = new JFrame("Load Image Sample");
-//             
-//         f.addWindowListener(new WindowAdapter(){
-//                 public void windowClosing(WindowEvent e) {
-//                     System.exit(0);
-//                 }
-//             });
-// 
-//         f.add(new LoadImageApp());
-//         f.pack();
-//         f.setVisible(true);
-    }
 }
 
 

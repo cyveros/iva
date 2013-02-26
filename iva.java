@@ -15,10 +15,21 @@ public class iva {
     private double numberOfPixels;
     
     private double mean = 0, std = 0;
+    private int[][] pixelScore;
+    
+    private boolean[][] gridVerticalNoise,
+						gridHorizontalNoise,
+						gridDiagonalNoise,
+						gridGeneralNoise,
+						gridColorNoise,
+						gridCenterSurroundNoise;
+    
     // some common color code
-    private final int white = 0xFFFFFF, black = 0, grey = 0x808080;
+    private final int WHITE = 0xFFFFFF, BLACK = 0, GREY = 0x808080, BLUE = 0x0000FF, YELLOW = 0xFFFF00, GREEN = 0x008000;
+    private final int v0 = 100, v1 = 50, v2 = 25, v3 = 10, threshold = v0;
     // factor
     private final double upper = 1.25, lower = 0.75;
+    
     
     public iva(String imgPath){
 		try {
@@ -44,6 +55,20 @@ public class iva {
 		
 		this.mean = x.getMean();
 		this.std = x.getStandardDeviation();
+	}
+	
+	public void colorImageComplete(){
+		
+		for (int i = 1; i < width - 3; i++){
+			for (int j = 0; j < height - 3; j++){
+				if (gridDiagonalNoise[i][j]) setColor(i - 1, j, YELLOW);
+				else if (gridHorizontalNoise[i][j]) setColor(i - 1, j, BLUE);
+				else if (gridVerticalNoise[i][j]) setColor(i - 1, j, GREEN);
+				else setColor(i - 1, j, BLACK);
+			}
+		}
+		
+		output("colorcomplete.png");
 	}
 	
 	public void computeMean(){
@@ -78,6 +103,10 @@ public class iva {
 		
 	}
 	
+	public int getRGB(int x, int y){
+		return getAlphalessRGB(x, y);
+	}
+	
 	public double getStandardDeviation(){
 		return std;
 	}
@@ -87,6 +116,16 @@ public class iva {
 		height = img.getHeight();
 		
 		numberOfPixels = width * height;
+		
+		pixelScore = new int[width][height];
+		
+		gridVerticalNoise 		= new boolean[width][height];
+		gridHorizontalNoise 	= new boolean[width][height];
+		gridDiagonalNoise 		= new boolean[width][height];
+		gridGeneralNoise 		= new boolean[width][height];
+		gridColorNoise 			= new boolean[width][height];
+		gridCenterSurroundNoise = new boolean[width][height];
+		
 	}
 	
 	public int getWidth(){
@@ -102,47 +141,414 @@ public class iva {
 				color = getAlphalessRGB(i, j);
 				
 				if ((double)color > mean + (double)upper * std){
-					setColor(i, j, white);
-					//System.out.println("color:\t" + color + ", compared:\t" + (mean + (double)white * std) + ", white");
+					setColor(i, j, WHITE);
+					//System.out.println("color:\t" + color + ", compared:\t" + (mean + (double)WHITE * std) + ", WHITE");
 				}else if ((double)color < mean - (double)lower * std){
-					setColor(i, j, black);
-					//System.out.println("color:\t" + color + ", compared:\t" + (mean - (double)black * std) + ", black");
+					setColor(i, j, BLACK);
+					//System.out.println("color:\t" + color + ", compared:\t" + (mean - (double)BLACK * std) + ", black");
 				}else{
-					setColor(i, j, grey);
-					//System.out.println("color:\t" + color + ", compared:\t" + (mean + (double)black * std) + "," + (mean - (double)black * std) + "  grey");
+					setColor(i, j, GREY);
+					//System.out.println("color:\t" + color + ", compared:\t" + (mean + (double)black * std) + "," + (mean - (double)black * std) + "  GREY");
 				}
 			}
 		}
+		
+		output("gradientsmoothed.png");
 	}
 	
-	public void noiseReduction(){
+	public void lineComplete(){
 		
-		boolean[][] gridVerticalNoise = new boolean[width][height];
+		for (int i = 0; i < width; i++){
+			for(int j = 0; j < height; j++){
+				if (getRGB(i, j) == WHITE){
+					int m ,n,v;
+					
+					pixelScore[i][j] += v0;
+					
+					for(int k = 1; k < 4; k++) {
+						
+						if (k == 1) v = v1;
+						else if (k == 2) v = v2;
+						else v = v3;
+
+						for(m = i - k; m <= i + k; m++) {
+							if(m >= 0 && m < width && j - k >= 0)
+								pixelScore[m][j-k] += v;
+								
+							if(m >= 0 && m < width && j + k < height)
+								pixelScore[m][j+k] += v;
+						}
+						
+						for(n = j - k + 1; n < j + k; n++) {
+							if(i - k >= 0 && n >= 0 && n < height)
+								pixelScore[i-k][n] += v;
+								
+							if(i + k < width && n >= 0 && n < height)
+								pixelScore[i+k][n] += v;
+						}
+					}
+					
+				}	
+			}
+		}
 		
 		for (int i = 0; i < width; i++){
 			for (int j = 0; j < height; j++){
-				if (noiseVerticalReduction(i, j)){
-					// set grid values
-					gridVerticalNoise[i][j] = true;
-					
-					
-				}
-				else{
-					gridVerticalNoise[i][j] = false;
-				}
+				if (pixelScore[i][j] > threshold)
+					setColor(i, j, WHITE);
+				else
+					setColor(i, j, BLACK);
 			}
 		}
 		
-		// reduce color noise by reset to color to white or black
-		// to be implemented
+		output("after_linecomplete.png");
+	}
+	
+	public void lineDrawComplete(){
+		/*
+		for(i=0;i<height;i++) {
+		for(j=0;j<width;j++)
+			if(ImageLines->Canvas->Pixels[j][i]==clGreen) {
+				int topx,topy,bottomx,bottomy;
+				int k,l,m,n;
+
+				k=i;
+				l=j;
+
+				topx=j;
+				topy=i;
+				bottomx=j;
+				bottomy=i;
+
+				for(n=0;n<=window;n++) {
+					for(m=1;m<=jump && !(ImageLines->Canvas->Pixels[l+n][k-m]==clGreen);m++) ;
+
+					if (m<=jump && k>=0) {
+						topx=l+n;
+						topy=k-m;
+						k=k-m;
+						l=l+n;
+						n=-1;
+						continue;
+					}
+
+					for(m=1;m<=jump && !(ImageLines->Canvas->Pixels[l-n][k-m]==clGreen);m++) ;
+
+					if (m<=jump && k>=0) {
+						topx=l-n;
+						topy=k-m;
+						k=k-m;
+						l = l-n;
+						n=-1;
+						continue;
+					}
+
+				}
+
+				k=i;
+				l=j;
+				for(n=0;n<=window;n++) {
+					for(m=1;m<=jump && !(ImageLines->Canvas->Pixels[l+n][k+m]==clGreen);m++) ;
+
+					if (m<=jump && k<height) {
+						bottomx=l+n;
+						bottomy=k+m;
+						k=k+m;
+						l=l+n;
+						n=-1;
+						continue;
+					}
+
+					for(m=1;m<=jump && !(ImageLines->Canvas->Pixels[l-n][k+m]==clGreen);m++) ;
+
+					if (m<=jump && k<height) {
+						bottomx=l-n;
+						bottomy=k+m;
+						k=k+m;
+						l = l-n;
+						n=-1;
+						continue;
+					}
+
+				}
+
+                                if (i-topy>threshold || bottomy-i>threshold) {
+					for(k=i;k>=topy;k--)
+						for(l=j-window;l<=j+window;l++)
+							ImageLines->Canvas->Pixels[l][k]=clBlack;
+					for(k=i;k<=bottomy;k++)
+						for(l=j-window;l<=j+window;l++)
+							ImageLines->Canvas->Pixels[l][k]=clBlack;
+
+					verticalLines[numvlines][0] = topx;
+					verticalLines[numvlines][1] = topy;
+					verticalLines[numvlines][2] = bottomx;
+					verticalLines[numvlines][3] = bottomy;
+
+					numvlines++;
+				}
+                        }
+                        else if(ImageLines->Canvas->Pixels[j][i]==clBlue) {
+                                int leftx,lefty,rightx,righty;
+                                int k,l,m,n;
+
+				k=i;
+				l=j;
+
+                                leftx=j;
+				lefty=i;
+				rightx=j;
+				righty=i;
+
+				for(n=0;n<=window;n++) {
+					for(m=1;m<=jump && !(ImageLines->Canvas->Pixels[l-m][k+n]==clBlue);m++) ;
+
+					if (m<=jump && l>=0) {
+						leftx=l-m;
+						lefty=k+n;
+						k=k+n;
+						l=l-m;
+						n=-1;
+						continue;
+					}
+
+					for(m=1;m<=jump && !(ImageLines->Canvas->Pixels[l-m][k-n]==clBlue);m++) ;
+
+					if (m<=jump && l>=0) {
+						leftx=l-m;
+						lefty=k-n;
+						k=k-n;
+						l = l-m;
+						n=-1;
+						continue;
+					}
+
+				}
+
+				for(n=0;n<=window;n++) {
+					for(m=1;m<=jump && !(ImageLines->Canvas->Pixels[l+m][k+n]==clBlue);m++) ;
+
+					if (m<=jump && l<width) {
+						rightx=l+m;
+						righty=k+n;
+						k=k+n;
+						l=l+m;
+						n=-1;
+						continue;
+					}
+
+					for(m=1;m<=jump && !(ImageLines->Canvas->Pixels[l+m][k-n]==clBlue);m++) ;
+
+					if (m<=jump && l<width) {
+						rightx=l+m;
+						righty=k-n;
+						k=k-n;
+						l = l+m;
+						n=-1;
+						continue;
+					}
+
+				}
+
+                                if (j-leftx>threshold || rightx-j>threshold) {
+					for(k=i-window;k<=i+window;k++)
+						for(l=j;l>=leftx;l--)
+							ImageLines->Canvas->Pixels[l][k]=clBlack;
+					for(k=i-window;k<=i+window;k++)
+						for(l=j;l<=rightx;l++)
+							ImageLines->Canvas->Pixels[l][k]=clBlack;
+
+					horizontalLines[numhlines][0] = leftx;
+					horizontalLines[numhlines][1] = lefty;
+					horizontalLines[numhlines][2] = rightx;
+					horizontalLines[numhlines][3] = righty;
+
+					numhlines++;
+				}
+			}
+                ProgressBar1->Position=(i+1)*width;
+        }
+        
+        ImageLines->Canvas->Pen->Color=clGreen;
+        for(i=0;i<numvlines;i++) {
+                ImageLines->Canvas->MoveTo(verticalLines[i][0],verticalLines[i][1]);
+                ImageLines->Canvas->LineTo(verticalLines[i][2],verticalLines[i][3]);
+        }
+
+        ImageLines->Canvas->Pen->Color=clBlue;
+        for(i=0;i<numhlines;i++) {
+                ImageLines->Canvas->MoveTo(horizontalLines[i][0],horizontalLines[i][1]);
+                ImageLines->Canvas->LineTo(horizontalLines[i][2],horizontalLines[i][3]);
+        }
+		*/
+	}
+	
+	public void lineThinningComplete(){
+		
+	}
+	
+	public boolean noiseCenterSurround(int i, int j){
+		
+		double surroundColorSum, surroundColorAvrg;
+        int pixelValue;
+
+        // Out of bounds, do not calculate
+        if (i + 2 >= width || j + 2 >= height)
+			return true;
+
+        // Analysis 3X3 space
+        // * * *
+        // *   *
+        // * * *
+        surroundColorSum = getRGB(i, j) + getRGB(i, j + 1) + getRGB(i, j + 2) + getRGB(i + 1, j) +
+						   getRGB(i + 1, j + 2) + getRGB(i + 2, j) + getRGB(i + 2, j + 1) + getRGB(i + 2, j + 2);
+		
+        surroundColorAvrg = surroundColorSum / 8;
+
+        if ((double)getRGB(i + 1, j + 1) > surroundColorAvrg)  
+			return true;
+		
+		return false;
+	}
+	
+	public boolean noiseColor(int i, int j){
+		
+		int colors[] = new int[16], count[] = new int[16];
+        int ttlcolor, theColor;
+        int k, l, m, aPixel;
+
+        // Initalize arrays
+        for(k = 0; k < 16; k++){
+			colors[k] = -1;
+            count[k] = 0;
+        }
+
+        // Analysis 3X3 space
+
+		for(k = 0; k < 3 && (k + i) < width; k++){
+			for(l = 0; l < 3 && (l + j) < height; l++){
+		
+				aPixel = getRGB(i + k, j + l);
+				
+				for(m = 0; m < 16 && colors[m] != -1 && colors[m] != aPixel; m++);
+				
+				if (m < 16){
+						if (colors[m] == -1) colors[m] = aPixel;
+						count[m]++;
+				}
+			}
+		}
+
+        // Copy into next Image
+
+        for(ttlcolor = 0; ttlcolor < 16 && colors[ttlcolor] != -1; ttlcolor++);
+
+        if (ttlcolor !=1)
+			return true;
+
+		return false;
+	}
+	
+	public boolean noiseDiagonal(int i, int j){
+
+        double diagSumR, diagAvrgR, diagSumL, diagAvrgL,
+			   remainderSumR, remainderAvrgR, remainderSumL, remainderAvrgL;
+
+        // Out of bounds, do not calculate
+        if (i + 2 >= width || j + 2 >= height)
+			return true;
+
+        // Analysis 3X3 space
+        // diagSumR	diagSumL
+        // - - *	* - -
+        // - * -	- * -
+        // * - -	- - *
+		diagSumR = getRGB(i + 2, j) + getRGB(i + 1, j + 1) + getRGB(i, j + 2);
+		diagAvrgR = diagSumR / 3;
+		
+		diagSumL = getRGB(i, j) + getRGB(i + 1, j + 1) + getRGB(i + 2, j + 2);
+		diagAvrgL = diagSumL / 3;
+
+		remainderSumR = getRGB(i + 1, j) + getRGB(i + 2, j + 1) + getRGB(i + 1, j + 2) + getRGB(i, j + 1) + diagSumL - getRGB(i + 1, j + 1);
+		remainderAvrgR = remainderSumR / 6;
+
+		remainderSumL = remainderSumR + diagSumR - diagSumL;
+		remainderAvrgL = remainderSumL / 6;
+                        
+
+        // Copy into next Image
+        if (diagAvrgR > remainderAvrgR || diagAvrgL > remainderAvrgL)
+			return true;
+		
+		return false;
+	}
+	
+	public boolean noiseGeneral(int i, int j){
+
+        int points = 0;
+
+        // Out of bounds, do not calculate
+        if (i + 2 >= width || j + 2 >= height)
+			return true;
+
+        // Analysis 3X3 space
+		if (getRGB(i, j) > getRGB(i + 1, j)) points++;
+		if (getRGB(i + 2, j) > getRGB(i + 1, j)) points++;
+		if (getRGB(i + 1, j + 1) > getRGB(i, j + 1)) points++;
+		if (getRGB(i + 1, j + 1) > getRGB(i + 2, j + 1)) points++;
+		if (getRGB(i, j + 2) > getRGB(i + 1, j + 2)) points++;
+		if (getRGB(i + 2, j + 2) > getRGB(i + 1, j + 2)) points++;
+                
+
+        // Copy into next Image
+
+        if (points > 3)
+			return true;
+		
+		return false;
+	}
+	
+	public boolean noiseHorizontal(int i, int j){
+		
+		double horizontalSumT, horizontalSumB, horizontalAvrgT, horizontalAvrgB,
+			   remainderSumT, remainderSumB, remainderAvrgT, remainderAvrgB;
+
+        // Out of bounds, do not calculate
+        if (i + 2 >= width || j + 2 >= height)
+			return true;
+
+        // Analysis 3X3 space
+        // vertical Top *, Bottom #, middle - 
+        // * * *
+        // - - -
+        // # # #
+        
+        horizontalSumT = getRGB(i, j) + getRGB(i + 1, j) + getRGB(i + 2, j);
+        horizontalAvrgT = horizontalSumT / 3;
+
+		horizontalSumB = getRGB(i, j + 2) + getRGB(i + 1, j + 2) + getRGB(i + 2, j + 2);
+		horizontalAvrgB = horizontalSumB / 3;
+
+		remainderSumT = getRGB(i, j + 1) + getRGB(i + 1, j + 1) + getRGB(i + 2, j + 1) + horizontalSumB;
+		remainderAvrgT = remainderSumT / 6;
+
+		// ???
+		remainderSumB = remainderSumT - horizontalSumB + horizontalSumT;
+		remainderAvrgB = remainderSumB / 6;
+
+
+		if (horizontalAvrgT > remainderAvrgT)
+			return true;
+		
+		return false;
 	}
 	
 	// return a boolean flag whether there exists noise within 3 x 3 section of pixels
-	public boolean noiseVerticalReduction(int i, int j){
+	public boolean noiseVertical(int i, int j){
 
 		// Out of bounds, do not calculate
 		if (width <= i + 2 || height <= j + 2)
-			return false;
+			return true;
 		
 		double verticalSumR = 0, verticalSumL = 0, verticalAvrgR, verticalAvrgL,
 			   remainderSumR = 0, remainderSumL = 0, remainderAvrgR, remainderAvrgL;
@@ -153,13 +559,13 @@ public class iva {
         // * - #
         // * - #
         
-		verticalSumR += img.getRGB(i + 2, j) + img.getRGB(i + 2, j + 1) + img.getRGB(i + 2, j + 2);
+		verticalSumR += getRGB(i + 2, j) + getRGB(i + 2, j + 1) + getRGB(i + 2, j + 2);
 		verticalAvrgR = verticalSumR / 3;
 
-		verticalSumL += img.getRGB(i, j) + img.getRGB(i, j + 1) + img.getRGB(i, j + 2);
+		verticalSumL += getRGB(i, j) + getRGB(i, j + 1) + getRGB(i, j + 2);
 		verticalAvrgL = verticalSumL / 3;
 
-		remainderSumR = verticalSumL + img.getRGB(i + 1, j) + img.getRGB(i + 1, j + 1) + img.getRGB(i + 1, j + 2);
+		remainderSumR = verticalSumL + getRGB(i + 1, j) + getRGB(i + 1, j + 1) + getRGB(i + 1, j + 2);
 		
 		
 		// ??? remainderAvrgR is never used
@@ -177,6 +583,66 @@ public class iva {
 		
 	}
 	
+	public void noiseReduction(){
+		noiseReduction(false);
+	}
+	
+	public void noiseReduction(boolean flag){
+		
+		for (int i = 0; i < width; i++){
+			for (int j = 0; j < height; j++){
+				if (noiseVertical(i, j))
+					gridVerticalNoise[i][j] = true;
+				
+				if (noiseHorizontal(i, j))
+					gridHorizontalNoise[i][j] = true;
+					
+				if (noiseDiagonal(i, j))
+					gridDiagonalNoise[i][j] = true;
+					
+				if (noiseGeneral(i, j))
+					gridGeneralNoise[i][j] = true;
+					
+				if (noiseCenterSurround(i, j))
+					gridCenterSurroundNoise[i][j] = true;
+					
+				if (noiseColor(i, j))
+					gridColorNoise[i][j] = true;
+			}
+		}
+		
+		String o;
+		
+		if (flag)
+			o = "post_";
+		else
+			o = "";
+		
+		noiseSuppression(gridVerticalNoise);
+		output(o + "after_vertical.png");
+		noiseSuppression(gridHorizontalNoise);
+		output(o + "after_horizontal.png");
+		noiseSuppression(gridDiagonalNoise);
+		output(o + "after_diagonal.png");
+		//noiseSuppression(gridGeneralNoise);
+		//output("after_general.png");
+		noiseSuppression(gridCenterSurroundNoise);
+		output(o + "after_centersurround.png");
+		noiseSuppression(gridColorNoise);
+		output(o + "after_color.png");
+	}
+	
+	protected void noiseSuppression(boolean[][] grid){
+		for (int j = 0; j < height - 3; j++){
+			for (int i = 1; i <= width - 3; i++){
+				if ( ! grid[i][j])
+					setColor(i - 1, j, BLACK);
+				else
+					setColor(i - 1, j, WHITE);
+			}
+		}
+	}
+	
 	public void output(){
 		outputImage("o_test.png", "PNG");
 	}
@@ -187,14 +653,12 @@ public class iva {
 	
 	public void outputImage(String fileName, String type){
 		try {
-			File f = new File(fileName);
+			File f = new File("./o/" + fileName);
 			ImageIO.write(img, type, f);
 		} catch (IOException e){
 			e.printStackTrace();
 		} 
 	}
-	
-	
 	
 	public void preComputation(){
 		// pre computation steps

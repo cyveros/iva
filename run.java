@@ -11,17 +11,27 @@ public class run {
 		String imgPath = args[0];
 		
 		// create iva object
-		iva x = new iva(imgPath);
+		iva image = new iva(imgPath);
 		// perform basic configuration
-		x.preComputation();
+		image.preComputation();
 		
 		// edge detection
-		x.gradientSmoother();
-		x.output();
+		image.gradientSmoother();
+		System.out.println("Stage 1 - Image Grating Complete");
 		
-		// noise reduction (feature extract)
-		x.noiseReduction();
+		image.noiseReduction();
+		System.out.println("Stage 2 - Feature Extract Complete");
+
+		image.lineComplete();
+		System.out.println("Stage 3 - Line Completion complete");
 		
-		x.output("o_test2.png");
+		image.noiseReduction(true);
+		System.out.println("Stage 4 - Post-processing complete");
+		
+		image.lineThinningComplete();
+		System.out.println("Stage 5 - Line Thinning complete");
+		
+		image.colorImageComplete();
+		System.out.println("Stage 6 - Image Coloring complete");
 	}
 }

@@ -17,10 +17,11 @@ public class run {
 		
 		// edge detection
 		x.gradientSmoother();
+		x.output();
 		
-		// noise reduction
+		// noise reduction (feature extract)
 		x.noiseReduction();
 		
-		x.output();
+		x.output("o_test2.png");
 	}
 }

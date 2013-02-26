@@ -10,17 +10,19 @@ import java.math.*;
  */
 public class iva {
           
-    private BufferedImage in, out;
+    private BufferedImage img = null;
     private int width, height;
     private double numberOfPixels;
     
     private double mean = 0, std = 0;
+    // some common color code
     private final int white = 0xFFFFFF, black = 0, grey = 0x808080;
+    // factor
     private final double upper = 1.25, lower = 0.75;
     
     public iva(String imgPath){
 		try {
-			in = ImageIO.read(new File(imgPath));
+			img = ImageIO.read(new File(imgPath));
 			getProperties();
 			
 		} catch (IOException e){
@@ -29,12 +31,19 @@ public class iva {
 	}
     
     public iva(BufferedImage img){
-		this.in = img;
+		this.img = img;
 		getProperties();
 	}
 	
-	public void createOuputImage(){
-		out = new BufferedImage(width, height, BufferedImage.TYPE_INT_ARGB);
+	public iva(iva x){
+		this.img = x.getBufferedImage();
+		
+		this.height = x.getHeight();
+		this.width = x.getWidth();
+		this.numberOfPixels = height * width;
+		
+		this.mean = x.getMean();
+		this.std = x.getStandardDeviation();
 	}
 	
 	public void computeMean(){
@@ -53,18 +62,29 @@ public class iva {
 	}
 	
 	public int getAlphalessRGB(int x, int y){
-		return in.getRGB(x, y) & 0xFFFFFF;
+		return img.getRGB(x, y) & 0xFFFFFF;
+	}
+	
+	public BufferedImage getBufferedImage(){
+		return this.img;
 	}
 	
 	public int getHeight(){
 		return height;
 	}
 	
+	public double getMean(){
+		return mean;
+		
+	}
 	
+	public double getStandardDeviation(){
+		return std;
+	}
 	
 	public void getProperties(){
-		width = in.getWidth();
-		height = in.getHeight();
+		width = img.getWidth();
+		height = img.getHeight();
 		
 		numberOfPixels = width * height;
 	}
@@ -97,35 +117,97 @@ public class iva {
 	
 	public void noiseReduction(){
 		
+		boolean[][] gridVerticalNoise = new boolean[width][height];
+		
+		for (int i = 0; i < width; i++){
+			for (int j = 0; j < height; j++){
+				if (noiseVerticalReduction(i, j)){
+					// set grid values
+					gridVerticalNoise[i][j] = true;
+					
+					
+				}
+				else{
+					gridVerticalNoise[i][j] = false;
+				}
+			}
+		}
+		
+		// reduce color noise by reset to color to white or black
+		// to be implemented
 	}
 	
-	public void outputImage(String fileName, String type){
-		try {
-			File f = new File(fileName);
-			ImageIO.write(out, type, f);
-		} catch (IOException e){
-			e.printStackTrace();
-		} 
+	// return a boolean flag whether there exists noise within 3 x 3 section of pixels
+	public boolean noiseVerticalReduction(int i, int j){
+
+		// Out of bounds, do not calculate
+		if (width <= i + 2 || height <= j + 2)
+			return false;
+		
+		double verticalSumR = 0, verticalSumL = 0, verticalAvrgR, verticalAvrgL,
+			   remainderSumR = 0, remainderSumL = 0, remainderAvrgR, remainderAvrgL;
+			   
+        // Analysis 3X3 space
+        // vertical Left *, Right #, middle - 
+        // * - #
+        // * - #
+        // * - #
+        
+		verticalSumR += img.getRGB(i + 2, j) + img.getRGB(i + 2, j + 1) + img.getRGB(i + 2, j + 2);
+		verticalAvrgR = verticalSumR / 3;
+
+		verticalSumL += img.getRGB(i, j) + img.getRGB(i, j + 1) + img.getRGB(i, j + 2);
+		verticalAvrgL = verticalSumL / 3;
+
+		remainderSumR = verticalSumL + img.getRGB(i + 1, j) + img.getRGB(i + 1, j + 1) + img.getRGB(i + 1, j + 2);
+		
+		
+		// ??? remainderAvrgR is never used
+		remainderAvrgR = remainderSumR / 6;
+
+		remainderSumL = remainderSumR - verticalSumL + verticalSumR ;
+
+		remainderAvrgL = remainderSumL / 6;
+
+
+        if (verticalAvrgL > remainderAvrgL)
+			return true;
+			
+		return false;
+		
 	}
 	
 	public void output(){
 		outputImage("o_test.png", "PNG");
 	}
 	
+	public void output(String fileName){
+		outputImage(fileName, "PNG");
+	}
+	
+	public void outputImage(String fileName, String type){
+		try {
+			File f = new File(fileName);
+			ImageIO.write(img, type, f);
+		} catch (IOException e){
+			e.printStackTrace();
+		} 
+	}
+	
+	
+	
 	public void preComputation(){
 		// pre computation steps
 		computeMean();
 		computeStandardDeviation();
-		// create output image
-		createOuputImage();
 	}
 	
 	public void setColor(int x, int y, int color){
-		out.setRGB(x, y, 0xFF000000 | color);
+		img.setRGB(x, y, 0xFF000000 | color);
 	}
 	
 	public void setImage(BufferedImage img){
-		this.in = img;
+		this.img = img;
 		getProperties();
 	}
 

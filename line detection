@@ -1,0 +1,12 @@
+1. Find all the edge points in the image using any suitable edge
+detection scheme.
+2. Quantize the (m,c) space into a two-dimensional matrix H with
+appropriate quantization levels.
+3. Initialize the matrix H to zero.
+4. Each element of H matrix, ( , ) i i H m c , which is found to correspond to
+an edge point is incremented by 1. The result is a histogram or a
+vote matrix showing the frequency of edge points corresponding to
+certain (m,c) values (i.e. points lying on a common line).
+5. The histogram H is thresholded where only the large valued
+elements are taken. These elements correspond to lines in the
+original image.

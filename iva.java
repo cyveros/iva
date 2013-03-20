@@ -289,6 +289,105 @@ public class iva {
 		}	 
 	}
 	
+	public void imageJetStore(){
+		/*
+		// Save Jet
+        rowsize = (height/3.0)*width;
+        columnsize = height*(width/3.0);
+        boxsize =  (height/3.0)*(width/3.0);
+
+        for (int k=0; k<3; k++)
+        {
+                float sum,value;
+
+                sum = imageFeaturesOld[k][0];
+                sum += imageFeaturesOld[k][3];
+                sum += imageFeaturesOld[k][6];
+
+                MemoJet->Lines->Add(sum/columnsize);
+
+                sum = imageFeaturesOld[k][1];
+                sum += imageFeaturesOld[k][4];
+                sum += imageFeaturesOld[k][7];
+
+                MemoJet->Lines->Add(sum/columnsize);
+
+                sum = imageFeaturesOld[k][2];
+                sum += imageFeaturesOld[k][5];
+                sum += imageFeaturesOld[k][8];
+
+                MemoJet->Lines->Add(sum/columnsize);
+
+                sum = imageFeaturesOld[k][0];
+                sum += imageFeaturesOld[k][1];
+                sum += imageFeaturesOld[k][2];
+
+                MemoJet->Lines->Add(sum/rowsize);
+
+                sum = imageFeaturesOld[k][3];
+                sum += imageFeaturesOld[k][4];
+                sum += imageFeaturesOld[k][5];
+
+                MemoJet->Lines->Add(sum/rowsize);
+
+                sum = imageFeaturesOld[k][6];
+                sum += imageFeaturesOld[k][7];
+                sum += imageFeaturesOld[k][8];
+
+                MemoJet->Lines->Add(sum/rowsize);
+
+                for (int l=0; l<9; l++)
+                        MemoJet->Lines->Add(imageFeaturesOld[k][l]/boxsize);
+        }
+
+        for (int k=0; k<3; k++)
+        {
+                float sum,value;
+
+                sum = imageFeatures[k][0];
+                sum += imageFeatures[k][3];
+                sum += imageFeatures[k][6];
+
+                MemoJet->Lines->Add(sum/columnsize);
+
+                sum = imageFeatures[k][1];
+                sum += imageFeatures[k][4];
+                sum += imageFeatures[k][7];
+
+                MemoJet->Lines->Add(sum/columnsize);
+
+                sum = imageFeatures[k][2];
+                sum += imageFeatures[k][5];
+                sum += imageFeatures[k][8];
+
+                MemoJet->Lines->Add(sum/columnsize);
+
+                sum = imageFeatures[k][0];
+                sum += imageFeatures[k][1];
+                sum += imageFeatures[k][2];
+
+                MemoJet->Lines->Add(sum/rowsize);
+
+                sum = imageFeatures[k][3];
+                sum += imageFeatures[k][4];
+                sum += imageFeatures[k][5];
+
+                MemoJet->Lines->Add(sum/rowsize);
+
+                sum = imageFeatures[k][6];
+                sum += imageFeatures[k][7];
+                sum += imageFeatures[k][8];
+
+                MemoJet->Lines->Add(sum/rowsize);
+
+                for (int l=0; l<9; l++)
+                        MemoJet->Lines->Add(imageFeatures[k][l]/boxsize);
+        }
+
+		 */
+		
+	}
+	
 	
 	public boolean isInHeightRange(int val){
 		if (val >= height || val < 0)

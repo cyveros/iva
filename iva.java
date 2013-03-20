@@ -275,7 +275,7 @@ public class iva {
 					for(n = 0; n <= window; n++) {
 						// find approrpiate m (vertically above the current pixel 
 						// and within the jump range but still in green color) 
-						for(m = 1; m <= jump && !(getRGB(l + n, k + m) == GREEN); m++) ;
+						for(m = 1; m <= jump && isInHeightRange(k + m) && isInWidthRange(l + n) && !(getRGB(l + n, k + m) == GREEN); m++) ;
 
 						if (m <= jump && k < height) {
 							bottomx = l + n;
@@ -288,9 +288,9 @@ public class iva {
 						}
 
 						// similarly check horizontally to the left of current pixel
-						for(m = 1; m <= jump && !(getRGB(l - n, k + m) == GREEN); m++) ;
+						for(m = 1; m <= jump && isInHeightRange(k + m) && isInWidthRange(l - n) && !(getRGB(l - n, k + m) == GREEN); m++) ;
 
-						if (m <= jump && k < height) {
+						if (m <= jump && k < height && isInHeightRange(k + m) && isInWidthRange(l - n)) {
 							bottomx = l - n;
 							bottomy = k + m;
 							k += m;
@@ -324,9 +324,9 @@ public class iva {
 					int k = i, l = j, m, n;
 
 					for(n = 0; n <= window; n++) {
-						for(m = 1; m <= jump && !(getRGB(l - m, k + n) == BLUE); m++);
+						for(m = 1; m <= jump && isInHeightRange(k + n) && isInWidthRange(l - m) && !(getRGB(l - m, k + n) == BLUE); m++);
 
-						if (m <= jump && l >= 0) {
+						if (m <= jump && l >= 0 && isInHeightRange(k + n) && isInWidthRange(l - m)) {
 							leftx = l - m;
 							lefty = k + n;
 							k += n;
@@ -350,9 +350,9 @@ public class iva {
 					}
 
 					for(n = 0; n <= window; n++) {
-						for(m = 1; m <= jump && !(getRGB(l + m, k + n) == BLUE); m++);
+						for(m = 1; m <= jump && isInHeightRange(k + n) && isInWidthRange(l + m) && !(getRGB(l + m, k + n) == BLUE); m++);
 
-						if (m <= jump && l < width) {
+						if (m <= jump && l < width && isInHeightRange(k + n) && isInWidthRange(l + m)) {
 							rightx = l + m;
 							righty = k + n;
 							k += n;
@@ -362,9 +362,9 @@ public class iva {
 							continue;
 						}
 
-						for(m = 1; m <= jump && !(getRGB(l + m, k - n) == BLUE); m++);
+						for(m = 1; m <= jump && isInHeightRange(k - n) && isInWidthRange(l + m) && !(getRGB(l + m, k - n) == BLUE); m++);
 
-						if (m <= jump && l < width) {
+						if (m <= jump && l < width && isInHeightRange(k - n) && isInWidthRange(l + m)) {
 							rightx = l + m;
 							righty = k - n;
 							k -= n;
@@ -379,11 +379,13 @@ public class iva {
 					if (j - leftx > threshold || rightx - j > threshold) {
 						for(k = i - window; k <= i + window; k++)
 							for(l = j;l >= leftx; l--)
-								setColor(l, k, BLACK);
+								if (isInWidthRange(l) && isInHeightRange(k))
+									setColor(l, k, BLACK);
 								
 						for(k = i - window; k <= i + window; k++)
 							for(l = j; l <= rightx; l++)
-								setColor(l, k, BLACK);
+								if (isInWidthRange(l) && isInHeightRange(k))
+									setColor(l, k, BLACK);
 
 						horizontalLines[numhlines][0] = leftx;
 						horizontalLines[numhlines][1] = lefty;

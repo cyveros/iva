@@ -16,7 +16,10 @@ public class iva {
     
     private double mean = 0, std = 0;
     private int[][] pixelScore;
-    
+    private int[][] verticalLines, horizontalLines;
+    private int numvlines, numhlines;
+    private int jump = 5, window = 5;
+
     private boolean[][] gridVerticalNoise,
 						gridHorizontalNoise,
 						gridDiagonalNoise,
@@ -126,6 +129,9 @@ public class iva {
 		gridColorNoise 			= new boolean[width][height];
 		gridCenterSurroundNoise = new boolean[width][height];
 		
+		verticalLines = new int[1000][4];
+		horizontalLines = new int[1000][4];
+		
 	}
 	
 	public int getWidth(){
@@ -154,6 +160,20 @@ public class iva {
 		}
 		
 		output("gradientsmoothed.png");
+	}
+	
+	public boolean isInHeightRange(int val){
+		if (val >= height || val < 0)
+			return false;
+			
+		return true;
+	}
+	
+	public boolean isInWidthRange(int val){
+		if (val >= width || val < 0)
+			return false;
+			
+		return true;
 	}
 	
 	public void lineComplete(){
@@ -204,187 +224,205 @@ public class iva {
 		output("after_linecomplete.png");
 	}
 	
+	//! line Draw complete need some clarification !!!!!
 	public void lineDrawComplete(){
-		/*
-		for(i=0;i<height;i++) {
-		for(j=0;j<width;j++)
-			if(ImageLines->Canvas->Pixels[j][i]==clGreen) {
-				int topx,topy,bottomx,bottomy;
-				int k,l,m,n;
+		
+		int color;
+		for (int i = 0; i < height; i++){
+			for (int j = 0; j < width; j++){
+				
+				color = getRGB(j, i);
+				
+				if (color == GREEN){
+					// the pixel's color is green
+					int topx = j, topy = i, bottomx = j, bottomy = i;
+					int k = i,l = j, m, n;
+					
+					for(n = 0; n <= window; n++) {
+						// find approrpiate m (vertically above the current pixel 
+						// and within the jump range but still in green color) 
+						for(m = 1; m <= jump && isInWidthRange(l + n) && isInHeightRange(k - m) && !(getRGB(l + n, k - m) == GREEN); m++);
 
-				k=i;
-				l=j;
+						if (m <= jump && k >= 0 && isInWidthRange(l + n) && isInHeightRange(k - m)) {
+							topx = l + n;
+							topy = k - m;
+							k = k - m;
+							l = l + n;
+							n = -1;
+							
+							continue;
+						}
 
-				topx=j;
-				topy=i;
-				bottomx=j;
-				bottomy=i;
+						// similarly check horizontally to the left of current pixel
+						for(m = 1; m <= jump && (l - n) < width && (k - m) >= 0 && !(getRGB(l - n, k - m) == GREEN); m++);
 
-				for(n=0;n<=window;n++) {
-					for(m=1;m<=jump && !(ImageLines->Canvas->Pixels[l+n][k-m]==clGreen);m++) ;
+						if (m <= jump && k >= 0) {
+							topx = l - n;
+							topy = k - m;
+							k -= m;
+							l -= n;
+							n = -1;
+							
+							continue;
+						}
+					}
+					
+					
+					// reset k, l index
+					k = i;
+					l = j;
+					
+					for(n = 0; n <= window; n++) {
+						// find approrpiate m (vertically above the current pixel 
+						// and within the jump range but still in green color) 
+						for(m = 1; m <= jump && !(getRGB(l + n, k + m) == GREEN); m++) ;
 
-					if (m<=jump && k>=0) {
-						topx=l+n;
-						topy=k-m;
-						k=k-m;
-						l=l+n;
-						n=-1;
-						continue;
+						if (m <= jump && k < height) {
+							bottomx = l + n;
+							bottomy = k + m;
+							k += m;
+							l += n;
+							n = -1;
+							
+							continue;
+						}
+
+						// similarly check horizontally to the left of current pixel
+						for(m = 1; m <= jump && !(getRGB(l - n, k + m) == GREEN); m++) ;
+
+						if (m <= jump && k < height) {
+							bottomx = l - n;
+							bottomy = k + m;
+							k += m;
+							l -= n;
+							n = -1;
+							continue;
+						}
+
 					}
 
-					for(m=1;m<=jump && !(ImageLines->Canvas->Pixels[l-n][k-m]==clGreen);m++) ;
+					if (i - topy > threshold || bottomy - i > threshold) {
+						for(k = i; k >= topy; k--)
+							for(l = j - window;l <= j + window; l++)
+								setColor(l, k, BLACK);
+								
+						for(k = i;k <= bottomy; k++)
+							for(l = j - window;l <= j + window; l++)
+								setColor(l, k, BLACK);
+						
+						// set vertical line vector
+						verticalLines[numvlines][0] = topx;
+						verticalLines[numvlines][1] = topy;
+						verticalLines[numvlines][2] = bottomx;
+						verticalLines[numvlines][3] = bottomy;
 
-					if (m<=jump && k>=0) {
-						topx=l-n;
-						topy=k-m;
-						k=k-m;
-						l = l-n;
-						n=-1;
-						continue;
+						numvlines++;
+					}
+					
+				}else if (color == BLUE){
+					int leftx = j, lefty = i, rightx = j, righty = i;
+					int k = i, l = j, m, n;
+
+					for(n = 0; n <= window; n++) {
+						for(m = 1; m <= jump && !(getRGB(l - m, k + n) == BLUE); m++);
+
+						if (m <= jump && l >= 0) {
+							leftx = l - m;
+							lefty = k + n;
+							k += n;
+							l -= m;
+							n = -1;
+							continue;
+						}
+
+						for(m = 1; m <= jump && isInWidthRange(l - m) && isInHeightRange(k - n) && !(getRGB(l - m, k - n) == BLUE); m++) ;
+
+						if (m <= jump && l >= 0 && isInWidthRange(l - m) && isInHeightRange(k - n)) {
+							leftx = l - m;
+							lefty = k - n;
+							k -= n;
+							l -= m;
+							n = -1;
+							
+							continue;
+						}
+
 					}
 
-				}
+					for(n = 0; n <= window; n++) {
+						for(m = 1; m <= jump && !(getRGB(l + m, k + n) == BLUE); m++);
 
-				k=i;
-				l=j;
-				for(n=0;n<=window;n++) {
-					for(m=1;m<=jump && !(ImageLines->Canvas->Pixels[l+n][k+m]==clGreen);m++) ;
+						if (m <= jump && l < width) {
+							rightx = l + m;
+							righty = k + n;
+							k += n;
+							l += m;
+							n = -1;
+							
+							continue;
+						}
 
-					if (m<=jump && k<height) {
-						bottomx=l+n;
-						bottomy=k+m;
-						k=k+m;
-						l=l+n;
-						n=-1;
-						continue;
+						for(m = 1; m <= jump && !(getRGB(l + m, k - n) == BLUE); m++);
+
+						if (m <= jump && l < width) {
+							rightx = l + m;
+							righty = k - n;
+							k -= n;
+							l += m;
+							n = -1;
+							
+							continue;
+						}
+
 					}
 
-					for(m=1;m<=jump && !(ImageLines->Canvas->Pixels[l-n][k+m]==clGreen);m++) ;
+					if (j - leftx > threshold || rightx - j > threshold) {
+						for(k = i - window; k <= i + window; k++)
+							for(l = j;l >= leftx; l--)
+								setColor(l, k, BLACK);
+								
+						for(k = i - window; k <= i + window; k++)
+							for(l = j; l <= rightx; l++)
+								setColor(l, k, BLACK);
 
-					if (m<=jump && k<height) {
-						bottomx=l-n;
-						bottomy=k+m;
-						k=k+m;
-						l = l-n;
-						n=-1;
-						continue;
+						horizontalLines[numhlines][0] = leftx;
+						horizontalLines[numhlines][1] = lefty;
+						horizontalLines[numhlines][2] = rightx;
+						horizontalLines[numhlines][3] = righty;
+
+						numhlines++;
 					}
-
-				}
-
-                                if (i-topy>threshold || bottomy-i>threshold) {
-					for(k=i;k>=topy;k--)
-						for(l=j-window;l<=j+window;l++)
-							ImageLines->Canvas->Pixels[l][k]=clBlack;
-					for(k=i;k<=bottomy;k++)
-						for(l=j-window;l<=j+window;l++)
-							ImageLines->Canvas->Pixels[l][k]=clBlack;
-
-					verticalLines[numvlines][0] = topx;
-					verticalLines[numvlines][1] = topy;
-					verticalLines[numvlines][2] = bottomx;
-					verticalLines[numvlines][3] = bottomy;
-
-					numvlines++;
-				}
-                        }
-                        else if(ImageLines->Canvas->Pixels[j][i]==clBlue) {
-                                int leftx,lefty,rightx,righty;
-                                int k,l,m,n;
-
-				k=i;
-				l=j;
-
-                                leftx=j;
-				lefty=i;
-				rightx=j;
-				righty=i;
-
-				for(n=0;n<=window;n++) {
-					for(m=1;m<=jump && !(ImageLines->Canvas->Pixels[l-m][k+n]==clBlue);m++) ;
-
-					if (m<=jump && l>=0) {
-						leftx=l-m;
-						lefty=k+n;
-						k=k+n;
-						l=l-m;
-						n=-1;
-						continue;
-					}
-
-					for(m=1;m<=jump && !(ImageLines->Canvas->Pixels[l-m][k-n]==clBlue);m++) ;
-
-					if (m<=jump && l>=0) {
-						leftx=l-m;
-						lefty=k-n;
-						k=k-n;
-						l = l-m;
-						n=-1;
-						continue;
-					}
-
-				}
-
-				for(n=0;n<=window;n++) {
-					for(m=1;m<=jump && !(ImageLines->Canvas->Pixels[l+m][k+n]==clBlue);m++) ;
-
-					if (m<=jump && l<width) {
-						rightx=l+m;
-						righty=k+n;
-						k=k+n;
-						l=l+m;
-						n=-1;
-						continue;
-					}
-
-					for(m=1;m<=jump && !(ImageLines->Canvas->Pixels[l+m][k-n]==clBlue);m++) ;
-
-					if (m<=jump && l<width) {
-						rightx=l+m;
-						righty=k-n;
-						k=k-n;
-						l = l+m;
-						n=-1;
-						continue;
-					}
-
-				}
-
-                                if (j-leftx>threshold || rightx-j>threshold) {
-					for(k=i-window;k<=i+window;k++)
-						for(l=j;l>=leftx;l--)
-							ImageLines->Canvas->Pixels[l][k]=clBlack;
-					for(k=i-window;k<=i+window;k++)
-						for(l=j;l<=rightx;l++)
-							ImageLines->Canvas->Pixels[l][k]=clBlack;
-
-					horizontalLines[numhlines][0] = leftx;
-					horizontalLines[numhlines][1] = lefty;
-					horizontalLines[numhlines][2] = rightx;
-					horizontalLines[numhlines][3] = righty;
-
-					numhlines++;
-				}
+				}	
 			}
-                ProgressBar1->Position=(i+1)*width;
-        }
-        
-        ImageLines->Canvas->Pen->Color=clGreen;
-        for(i=0;i<numvlines;i++) {
-                ImageLines->Canvas->MoveTo(verticalLines[i][0],verticalLines[i][1]);
-                ImageLines->Canvas->LineTo(verticalLines[i][2],verticalLines[i][3]);
-        }
-
-        ImageLines->Canvas->Pen->Color=clBlue;
-        for(i=0;i<numhlines;i++) {
-                ImageLines->Canvas->MoveTo(horizontalLines[i][0],horizontalLines[i][1]);
-                ImageLines->Canvas->LineTo(horizontalLines[i][2],horizontalLines[i][3]);
-        }
-		*/
+		}
+		
+		// first attempt to simulate line drawing
+		// we need a unified method to 
+		// 1. convert BufferedImage object into Graphics2D object
+		Graphics2D g2d = img.createGraphics();
+		
+		// 2. draw the line with specific color from specific starting point to end point
+		// set draw color
+		g2d.setColor(Color.GREEN);
+		
+		int index = 0;
+		
+		for (index = 0; index < numvlines; index++){
+			g2d.drawLine(verticalLines[index][0], verticalLines[index][1], verticalLines[index][2], verticalLines[index][3]);
+		}
+		
+		g2d.setColor(Color.BLUE);
+		for (index = 0; index < numhlines; index++){
+			g2d.drawLine(verticalLines[index][0], verticalLines[index][1], verticalLines[index][2], verticalLines[index][3]);
+		}
+		
+		// 3. release resource
+		g2d.dispose();
+		output("after_drawlinecomplete.png");
 	}
 	
 	public void lineThinningComplete(){
-		
+		// implementation goes here
 	}
 	
 	public boolean noiseCenterSurround(int i, int j){

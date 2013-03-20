@@ -10,6 +10,7 @@ public class run {
 	public static void main(String[] args){
 		String imgPath = args[0];
 		
+		// port from cpp source code
 		// create iva object
 		iva image = new iva(imgPath);
 		// perform basic configuration
@@ -33,5 +34,11 @@ public class run {
 		
 		image.colorImageComplete();
 		System.out.println("Stage 6 - Image Coloring complete");
+		
+		image.lineDrawComplete();
+		System.out.println("Stage 7 - Line draw complete");
+		
+		
+		// new 
 	}
 }

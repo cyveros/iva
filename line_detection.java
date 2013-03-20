@@ -40,9 +40,9 @@ public class line_detection {
 		
 		//split the points into sections and computer linear regression for each section
 		for (int k = 0; k < hPoints.size(); k++){
-				if((hPoint.get(k).get_y() - yTemp) < hLimit){
-					temp.add(hPoint.get(k));
-					yTemp = hPoint.get(k).get_y();
+				if(abs(hPoints.get(k).get_y() - yTemp) < hLimit){
+					temp.add(hPoints.get(k));
+					yTemp = hPoints.get(k).get_y();
 				}
 				else{
 					hLines.add(computeLine(temp));
@@ -70,9 +70,9 @@ public class line_detection {
 		
 		//split the points into sections and computer linear regression for each section
 		for (int k = 0; k < vPoints.size(); k++){
-				if((vPoint.get(k).get_x() - xTemp) < wLimit){
-					temp.add(vPoint.get(k));
-					xTemp = vPoint.get(k).get_x();
+				if(abs(vPoints.get(k).get_x() - xTemp) < wLimit){
+					temp.add(vPoints.get(k));
+					xTemp = vPoints.get(k).get_x();
 				}
 				else{
 					vLines.add(computeLine(temp));
@@ -82,7 +82,49 @@ public class line_detection {
 		
 	}
 	
-	
+		public ArrayList<line> getDiagonalLine(){
+			//find all the points on the gridg
+			double dLimit = 0.05*sqrt(width*width + height*height);
+			double xTemp = 0;
+			double yTemp = 0;
+			double xd = 0;
+			double yd = 0;
+			ArrayList<ArrayList<Point>> temp2 = new ArrayList<ArrayList<point>>();
+			ArrayList<point> temp1 = new ArrayList<point>();
+			//split the (x, y) to portions
+			for (int i = 0; i < width - 3; i++){
+				for (int j = 1; j < height - 3; j++){
+					if(gridNoise[i][j]){
+						xd = i - xTemp;
+						yd = j - yTemp;
+						if (temp2.isEmpty()){
+							if (temp2.isEmpty()){
+								
+							}
+							temp1.add(point(i,j));
+							
+						}
+					}
+				}
+			}
+			
+			//split the points into sections and computer linear regression for each section
+			/*
+			for (int k = 0; k < dPoints.size(); k++){
+					double xd = dPoints.get(k).get_x() - xTemp;
+					double yd = dPoints.get(k).get_y() - yTemp;
+					if(sqrt(xd*xd + yd*yd) < dLimit){
+						temp.add(dPoint.get(k));
+						xTemp = dPoints.get(k).get_x();
+						yTemp = dPoints.get(k).get_y();
+						
+					}
+					else{
+						vLines.add(computeLine(temp));
+					}
+				}
+			}*/
+		}
 	
 	
 	

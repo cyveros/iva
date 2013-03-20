@@ -1,7 +1,5 @@
-iva
+Image Vision Analysis (IVA)
 ===
-
-## Image Vision Analysis
 
 Image processing general algorithm implementation
 

@@ -38,7 +38,8 @@ public class run {
 		image.lineDrawComplete();
 		System.out.println("Stage 7 - Line draw complete");
 		
+		image.imageJet();
+		System.out.println("Stage X - Image jet complete");
 		
-		// new 
 	}
 }

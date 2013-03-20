@@ -5,9 +5,6 @@ import java.io.*;
 import javax.imageio.*;
 import java.math.*;
 
-/**
- * This class demonstrates how to load an Image from an external file
- */
 public class iva {
           
     private BufferedImage img = null;
@@ -26,6 +23,10 @@ public class iva {
 						gridGeneralNoise,
 						gridColorNoise,
 						gridCenterSurroundNoise;
+	private boolean[][] gridVerticalJet,
+						gridHorizontalJet,
+						gridDiagonalJet;
+    private int[][] imageFeaturesOld, imageFeatures;
     
     // some common color code
     private final int WHITE = 0xFFFFFF, BLACK = 0, GREY = 0x808080, BLUE = 0x0000FF, YELLOW = 0xFFFF00, GREEN = 0x008000;
@@ -129,9 +130,16 @@ public class iva {
 		gridColorNoise 			= new boolean[width][height];
 		gridCenterSurroundNoise = new boolean[width][height];
 		
+		imageFeaturesOld = new int[3][9];
+		imageFeatures = new int[3][9]; 
+		
 		verticalLines = new int[1000][4];
 		horizontalLines = new int[1000][4];
 		
+		// initialize jet vectors
+		gridVerticalJet 		= new boolean[width][height];
+		gridHorizontalJet 		= new boolean[width][height];
+		gridDiagonalJet 		= new boolean[width][height];
 	}
 	
 	public int getWidth(){
@@ -161,6 +169,126 @@ public class iva {
 		
 		output("gradientsmoothed.png");
 	}
+	
+	public void imageJet(){
+		int i, j;
+		
+		for (j = 0; j < height - 3; j++){
+			for (i = 0; i < width; i++){
+				if (gridDiagonalNoise[i][j])
+					gridHorizontalJet[i][j] = false;
+				else
+					gridHorizontalJet[i][j] = gridHorizontalNoise[i][j];
+					
+				if (gridDiagonalNoise[i][j] || gridVerticalNoise[i][j])
+					gridVerticalJet[i][j] = false;
+				else
+					gridVerticalJet[i][j] = gridVerticalNoise[i][j];
+					
+				gridDiagonalJet[i][j] = gridDiagonalNoise[i][j];
+			}
+		}
+		
+		for (j = 0; j < height - 3; j++){
+			if (j < height / 3){
+				for(i = 1; i <= width - 3; i++){
+					if (i < width / 3){
+						imageFeaturesOld[0][0] += gridVerticalNoise[i][j] ? 1 : 0;
+						imageFeaturesOld[1][0] += gridHorizontalNoise[i][j] ? 1 : 0;
+						imageFeaturesOld[2][0] += gridDiagonalNoise[i][j] ? 1 : 0;
+
+						imageFeatures[0][0] += gridVerticalJet[i][j] ? 1 : 0;
+						imageFeatures[1][0] += gridHorizontalJet[i][j] ? 1 : 0;
+						imageFeatures[2][0] += gridDiagonalJet[i][j] ? 1 : 0;
+					}else if (i >= width / 3 && i < 2 * (width / 3)){
+						imageFeaturesOld[0][1] += gridVerticalNoise[i][j] ? 1 : 0;
+						imageFeaturesOld[1][1] += gridHorizontalNoise[i][j] ? 1 : 0;
+						imageFeaturesOld[2][1] += gridDiagonalNoise[i][j] ? 1 : 0;
+
+						imageFeatures[0][1] += gridVerticalJet[i][j] ? 1 : 0;
+						imageFeatures[1][1] += gridHorizontalJet[i][j] ? 1 : 0;
+						imageFeatures[2][1] += gridDiagonalJet[i][j] ? 1 : 0;
+					}else{
+						imageFeaturesOld[0][2] += gridVerticalNoise[i][j] ? 1 : 0;
+						imageFeaturesOld[1][2] += gridHorizontalNoise[i][j] ? 1 : 0;
+						imageFeaturesOld[2][2] += gridDiagonalNoise[i][j] ? 1 : 0;
+
+						imageFeatures[0][2] += gridVerticalJet[i][j] ? 1 : 0;
+						imageFeatures[1][2] += gridHorizontalJet[i][j] ? 1 : 0;
+						imageFeatures[2][2] += gridDiagonalJet[i][j] ? 1 : 0;
+					}
+				}
+			}else if (j >= height / 3 && j < 2 * (height / 3)){
+				for(i = 1; i <= width - 3; i++){
+					if (i < width / 3)
+					{
+						imageFeaturesOld[0][3] += gridVerticalNoise[i][j] ? 1 : 0;
+						imageFeaturesOld[1][3] += gridHorizontalNoise[i][j] ? 1 : 0;
+						imageFeaturesOld[2][3] += gridDiagonalNoise[i][j] ? 1 : 0;
+
+						imageFeatures[0][3] += gridVerticalJet[i][j] ? 1 : 0;
+						imageFeatures[1][3] += gridHorizontalJet[i][j] ? 1 : 0;
+						imageFeatures[2][3] += gridDiagonalJet[i][j] ? 1 : 0;
+					}
+					else if (i >= width / 3 && i < 2 * (width / 3))
+					{
+						imageFeaturesOld[0][4] += gridVerticalNoise[i][j] ? 1 : 0;
+						imageFeaturesOld[1][4] += gridHorizontalNoise[i][j] ? 1 : 0;
+						imageFeaturesOld[2][4] += gridDiagonalNoise[i][j] ? 1 : 0;
+
+						imageFeatures[0][4] += gridVerticalJet[i][j] ? 1 : 0;
+						imageFeatures[1][4] += gridHorizontalJet[i][j] ? 1 : 0;
+						imageFeatures[2][4] += gridDiagonalJet[i][j] ? 1 : 0;
+					}
+					else
+					{
+						imageFeaturesOld[0][5] += gridVerticalNoise[i][j] ? 1 : 0;
+						imageFeaturesOld[1][5] += gridHorizontalNoise[i][j] ? 1 : 0;
+						imageFeaturesOld[2][5] += gridDiagonalNoise[i][j] ? 1 : 0;
+
+						imageFeatures[0][5] += gridVerticalJet[i][j] ? 1 : 0;
+						imageFeatures[1][5] += gridHorizontalJet[i][j] ? 1 : 0;
+						imageFeatures[2][5] += gridDiagonalJet[i][j] ? 1 : 0;
+					}
+				}
+			}else{
+				for(i = 1; i <= width - 3; i++){
+					if (i < width / 3)
+					{
+						imageFeaturesOld[0][6] += gridVerticalNoise[i][j] ? 1 : 0;
+						imageFeaturesOld[1][6] += gridHorizontalNoise[i][j] ? 1 : 0;
+						imageFeaturesOld[2][6] += gridDiagonalNoise[i][j] ? 1 : 0;
+
+						imageFeatures[0][6] += gridVerticalJet[i][j] ? 1 : 0;
+						imageFeatures[1][6] += gridHorizontalJet[i][j] ? 1 : 0;
+						imageFeatures[2][6] += gridDiagonalJet[i][j] ? 1 : 0;
+					}
+
+					else if (i>=width/3 && i<2*(width/3))
+					{
+						imageFeaturesOld[0][7] += gridVerticalNoise[i][j] ? 1 : 0;
+						imageFeaturesOld[1][7] += gridHorizontalNoise[i][j] ? 1 : 0;
+						imageFeaturesOld[2][7] += gridDiagonalNoise[i][j] ? 1 : 0;
+
+						imageFeatures[0][7] += gridVerticalJet[i][j] ? 1 : 0;
+						imageFeatures[1][7] += gridHorizontalJet[i][j] ? 1 : 0;
+						imageFeatures[2][7] += gridDiagonalJet[i][j] ? 1 : 0;
+					}
+					else
+					{
+						imageFeaturesOld[0][8] += gridVerticalNoise[i][j] ? 1 : 0;
+						imageFeaturesOld[1][8] += gridHorizontalNoise[i][j] ? 1 : 0;
+						imageFeaturesOld[2][8] += gridDiagonalNoise[i][j] ? 1 : 0;
+
+						imageFeatures[0][8] += gridVerticalJet[i][j] ? 1 : 0;
+						imageFeatures[1][8] += gridHorizontalJet[i][j] ? 1 : 0;
+						imageFeatures[2][8] += gridDiagonalJet[i][j] ? 1 : 0;
+					}
+				}
+			}
+		}	 
+	}
+	
 	
 	public boolean isInHeightRange(int val){
 		if (val >= height || val < 0)
@@ -693,7 +821,7 @@ public class iva {
 	
 	public void outputImage(String fileName, String type){
 		try {
-			File f = new File("./o/" + fileName);
+			File f = new File("." + File.separator + "o" + File.separator + fileName);
 			ImageIO.write(img, type, f);
 		} catch (IOException e){
 			e.printStackTrace();

@@ -23,6 +23,8 @@ public class iva {
 						gridGeneralNoise,
 						gridColorNoise,
 						gridCenterSurroundNoise;
+						
+	private boolean[][] gridRed, gridGreen, gridBlue, gridYellow;
 	private boolean[][] gridVerticalJet,
 						gridHorizontalJet,
 						gridDiagonalJet;
@@ -33,7 +35,7 @@ public class iva {
     private int[][] imageFeaturesOld, imageFeatures;
     
     // some common color code
-    private final int WHITE = 0xFFFFFF, BLACK = 0, GREY = 0x808080, BLUE = 0x0000FF, YELLOW = 0xFFFF00, GREEN = 0x008000;
+    private final int WHITE = 0xFFFFFF, BLACK = 0, GREY = 0x808080, BLUE = 0x0000FF, YELLOW = 0xFFFF00, GREEN = 0x008000, RED = 0xFF0000;
     private final int v0 = 100, v1 = 50, v2 = 25, v3 = 10, threshold = v0;
     // factor
     private final double upper = 1.25, lower = 0.75;
@@ -119,9 +121,37 @@ public class iva {
 		return getAlphalessRGB(x, y);
 	}
 	
-	public int getRGBBlue(int x, int y){
-		return getRGB(x, y) & 0xFF;
+	public int getRGB(int x, int y, int colorFilter){
+		return getRGB(x, y) & colorFilter;
 	}
+	
+	public void getGrid(){
+		for(int i = 0; i < height; i++){
+			for (int j = 0; j < width; j++){
+				gridBlue[j][i] = getRGB(j, i, BLUE) != BLUE;
+				gridGreen[j][i] = getRGB(j, i, GREEN) != GREEN;
+				gridRed[j][i] = getRGB(j, i, RED) != RED;
+				gridYellow[j][i] = getRGB(j, i, YELLOW) != YELLOW;
+			}
+		}
+	}
+	
+	public boolean[][] getGridBlue(){
+		return gridBlue;
+	}
+	
+	public boolean[][] getGridRed(){
+		return gridRed;
+	}
+	
+	public boolean[][] getGridGreen(){
+		return gridGreen;
+	}
+	
+	public boolean[][] getGridYellow(){
+		return gridYellow;
+	}
+	
 	
 	public double getStandardDeviation(){
 		return std;

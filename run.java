@@ -38,6 +38,9 @@ public class run {
 		image.lineDrawComplete();
 		System.out.println("Stage 7 - Line draw complete");
 		
+		// shape detection
+		
+		
 		image.imageJet();
 		System.out.println("Stage X - Image jet complete");
 		

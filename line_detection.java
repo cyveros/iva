@@ -8,12 +8,12 @@ import java.util.ArrayList;
 
 public class line_detection { 
 
-	private ArrayList<line> hLines = new ArrayList<line>();
-	private ArrayList<line> vLines = new ArrayList<line>();
-	private ArrayList<line> dLines = new ArrayList<line>();
-	private ArrayList<point> hPoints = new ArrayList<point>();
-	private ArrayList<point> vPoints = new ArrayList<point>();
-	private ArrayList<point> dPoints = new ArrayList<point>();
+	private ArrayList<Point> hLines = new ArrayList<Point>();
+	private ArrayList<Point> vLines = new ArrayList<Point>();
+	private ArrayList<Point> dLines = new ArrayList<Point>();
+	private ArrayList<Point> hPoints = new ArrayList<Point>();
+	private ArrayList<Point> vPoints = new ArrayList<Point>();
+	private ArrayList<Point> dPoints = new ArrayList<Point>();
 	private boolean[][] gridNoise;
 	private int height, width;
 	
@@ -23,128 +23,142 @@ public class line_detection {
 		this.width = w;
 	}
 	
-	public ArrayList<line> getHorizontalLine(){
+	public ArrayList<Point> getHorizontalLine(){
 		
-		//find all the points on the gridg
+		//find all the points on the grid
 		double hLimit = 0.05*height;
 		double yTemp = 0;
-		ArrayList<point> temp = new ArrayList<point>();
+		ArrayList<Point> temp = new ArrayList<Point>();
 		//store the (x, y) in a list
 		for (int i = 1; i < height - 3; i++){
 			for (int j = 0; j < width - 3; j++){
 				if(gridNoise[i][j]){
-					hPoints.add(point(i,j));
+					hPoints.add(new Point(i,j));
 				}
 			}
 		}
 		
 		//split the points into sections and computer linear regression for each section
 		for (int k = 0; k < hPoints.size(); k++){
-				if(abs(hPoints.get(k).get_y() - yTemp) < hLimit){
+				if(Math.abs(hPoints.get(k).getY() - yTemp) < hLimit){
 					temp.add(hPoints.get(k));
-					yTemp = hPoints.get(k).get_y();
+					yTemp = hPoints.get(k).getY();
 				}
 				else{
 					hLines.add(computeLine(temp));
 				}
 			}
+		return hLines;
 		}
 		
-	}
 	
 	
-	public ArrayList<line> getVerticalLine(){
+	
+	public ArrayList<Point> getVerticalLine(){
 		
-		//find all the points on the gridg
+		//find all the points on the grid
 		double wLimit = 0.05*width;
 		double xTemp = 0;
-		ArrayList<point> temp = new ArrayList<point>();
+		ArrayList<Point> temp = new ArrayList<Point>();
 		//store the (x, y) in a list
 		for (int i = 0; i < width - 3; i++){
 			for (int j = 1; j < height - 3; j++){
 				if(gridNoise[i][j]){
-					vPoints.add(point(i,j));
+					vPoints.add(new Point(i,j));
 				}
 			}
 		}
 		
 		//split the points into sections and computer linear regression for each section
 		for (int k = 0; k < vPoints.size(); k++){
-				if(abs(vPoints.get(k).get_x() - xTemp) < wLimit){
+				if(Math.abs(vPoints.get(k).getX() - xTemp) < wLimit){
 					temp.add(vPoints.get(k));
-					xTemp = vPoints.get(k).get_x();
+					xTemp = vPoints.get(k).getX();
 				}
 				else{
 					vLines.add(computeLine(temp));
 				}
 			}
+		return vLines;
 		}
 		
-	}
 	
-		public ArrayList<line> getDiagonalLine(){
-			//find all the points on the gridg
-			double dLimit = 0.05*sqrt(width*width + height*height);
+	
+		public ArrayList<Point> getDiagonalLine(){
+			//find all the points on the grid
+			double dLimit = 0.05*(width*width + height*height);
 			double xTemp = 0;
 			double yTemp = 0;
-			double xd = 0;
-			double yd = 0;
-			ArrayList<ArrayList<Point>> temp2 = new ArrayList<ArrayList<point>>();
-			ArrayList<point> temp1 = new ArrayList<point>();
+			ArrayList<ArrayList<Point>> temp2 = new ArrayList<ArrayList<Point>>();
+			ArrayList<Point> temp1 = new ArrayList<Point>();
+
 			//split the (x, y) to portions
 			for (int i = 0; i < width - 3; i++){
 				for (int j = 1; j < height - 3; j++){
 					if(gridNoise[i][j]){
-						xd = i - xTemp;
-						yd = j - yTemp;
+						
 						if (temp2.isEmpty()){
-							if (temp2.isEmpty()){
+							temp2.get(0).add(new Point(i,j));
+						}
+						
+						else{
+							//for each set of points
+							for(int k = 0; k < temp2.size(); k++){
+								temp1 = temp2.get(k);
 								
+								if(temp1.isEmpty()){
+									temp1.add(new Point(i,j));
+								}
+								
+								else{
+									
+									int l = temp1.size() - 1;
+									xTemp = i - temp1.get(l).getX();
+									yTemp = j - temp1.get(l).getY();
+										
+									if((xTemp*xTemp + yTemp*yTemp) < dLimit){
+										
+										temp1.add(new Point(i,j));
+										break;
+									}
+									
+										
+								}
+								temp2.get(k+1).add(new Point(i,j));
 							}
-							temp1.add(point(i,j));
-							
+				
 						}
 					}
 				}
 			}
-			
-			//split the points into sections and computer linear regression for each section
-			/*
-			for (int k = 0; k < dPoints.size(); k++){
-					double xd = dPoints.get(k).get_x() - xTemp;
-					double yd = dPoints.get(k).get_y() - yTemp;
-					if(sqrt(xd*xd + yd*yd) < dLimit){
-						temp.add(dPoint.get(k));
-						xTemp = dPoints.get(k).get_x();
-						yTemp = dPoints.get(k).get_y();
-						
-					}
-					else{
-						vLines.add(computeLine(temp));
-					}
-				}
-			}*/
+		//find linear regression of each set of points	
+			for (int n = 0; n < temp2.size(); n++){
+				dLines.add(computeLine(temp2.get(n)));
+			}
+		return dLines;
 		}
 	
 	
 	
-	public line computeLine(ArraList<point> pts){
+	public Point computeLine(ArrayList<Point> pts){
 		// y = a + b*x
-		int xSum, ySum, xySum, x2Sum;
+		double xSum = 0, ySum = 0, xySum = 0, x2Sum = 0;
 		double a,b;
 		int N = pts.size();
+		Point pt = new Point();
 		
 		for(int i = 0; i < N; i++){
-			xSum = xSum + pts.get(i).get_x();
-			ySum = ySum + pts.get(i).get_y();
-			xySum = xySum + (pts.get(i).get_x())*(pts.get(i).get_y());
-			x2Sum = x2Sum + (pts.get(i).get_x())*(pts.get(i).get_x());
+			xSum = xSum + pts.get(i).getX();
+			ySum = ySum + pts.get(i).getY();
+			xySum = xySum + (pts.get(i).getX())*(pts.get(i).getY());
+			x2Sum = x2Sum + (pts.get(i).getX())*(pts.get(i).getX());
 		}
 		
 		b = (N*xySum - xSum*ySum)/(N*x2Sum - xSum*xSum);
 		a = (ySum - b*xSum)/N;
+		pt.setLocation(b, a);
 		
-		return line(b, a);
+		return pt;
 	}
 	
 }

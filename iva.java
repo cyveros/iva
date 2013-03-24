@@ -26,6 +26,10 @@ public class iva {
 	private boolean[][] gridVerticalJet,
 						gridHorizontalJet,
 						gridDiagonalJet;
+	
+	// jet
+	double rowsize,columsize, boxsize;
+	
     private int[][] imageFeaturesOld, imageFeatures;
     
     // some common color code
@@ -290,11 +294,18 @@ public class iva {
 	}
 	
 	public void imageJetStore(){
+		rowsize = (height / 3) * width;
+        columnsize = height * (width / 3);
+        boxsize =  (height / 3) * (width / 3);
+		
+		
+		// save jet
+		for (int k = 0; k < 3; k++){
+			
+		}
 		/*
 		// Save Jet
-        rowsize = (height/3.0)*width;
-        columnsize = height*(width/3.0);
-        boxsize =  (height/3.0)*(width/3.0);
+        
 
         for (int k=0; k<3; k++)
         {

@@ -28,7 +28,7 @@ public class iva {
 						gridDiagonalJet;
 	
 	// jet
-	double rowsize,columsize, boxsize;
+	double rowsize,columnsize, boxsize;
 	
     private int[][] imageFeaturesOld, imageFeatures;
     
@@ -95,6 +95,10 @@ public class iva {
 	}
 	
 	public int getAlphalessRGB(int x, int y){
+		// Java ARGB color scheme
+		// A		R		 G		  B
+		// 00000000	00000000 00000000 00000000
+		
 		return img.getRGB(x, y) & 0xFFFFFF;
 	}
 	
@@ -113,6 +117,10 @@ public class iva {
 	
 	public int getRGB(int x, int y){
 		return getAlphalessRGB(x, y);
+	}
+	
+	public int getRGBBlue(int x, int y){
+		return getRGB(x, y) & 0xFF;
 	}
 	
 	public double getStandardDeviation(){

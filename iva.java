@@ -500,7 +500,7 @@ public class iva {
 						}
 
 						// similarly check horizontally to the left of current pixel
-						for(m = 1; m <= jump && (l - n) < width && (k - m) >= 0 && !(getRGB(l - n, k - m) == GREEN); m++);
+						for(m = 1; m <= jump && isInWidthRange(l - n) && isInHeightRange(k - m) && !(getRGB(l - n, k - m) == GREEN); m++);
 
 						if (m <= jump && k >= 0) {
 							topx = l - n;

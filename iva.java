@@ -931,7 +931,7 @@ public class iva {
 	
 	public void outputImage(String fileName, String type){
 		try {
-			File f = new File("." + File.separator + "o" + File.separator + fileName);
+			File f = new File(".." + File.separator + "o" + File.separator + fileName);
 			ImageIO.write(img, type, f);
 		} catch (IOException e){
 			e.printStackTrace();

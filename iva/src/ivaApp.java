@@ -28,7 +28,7 @@ public class ivaApp extends Component{
     			}
     			
     			g.drawImage(img, countHorizontal * width, countVertical * height, null);
-    			System.out.println("x: " + countHorizontal + ", y: " + countVertical);
+    			//System.out.println("x: " + countHorizontal + ", y: " + countVertical);
     			++countHorizontal;
     				
     		}
@@ -108,7 +108,11 @@ public class ivaApp extends Component{
 		System.out.println("Stage X - Image jet complete");
 
         JFrame f = new JFrame("Image Vision Analysis");
-            
+        
+        JLabel textLabel = new JLabel("I'm a label in the window",SwingConstants.CENTER);
+        textLabel.setPreferredSize(new Dimension(300, 100));
+        f.getContentPane().add(textLabel, BorderLayout.CENTER); 
+        
         f.addWindowListener(new WindowAdapter(){
                 public void windowClosing(WindowEvent e) {
                     System.exit(0);

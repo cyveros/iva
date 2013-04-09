@@ -7,6 +7,6 @@
 <listEntry value="1"/>
 </listAttribute>
 <stringAttribute key="org.eclipse.jdt.launching.MAIN_TYPE" value="ivaApp"/>
-<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="C:\Users\cyv\dev\iva2\iva\bin\sample_image_1.bmp C:\Users\cyv\dev\iva2\iva"/>
+<stringAttribute key="org.eclipse.jdt.launching.PROGRAM_ARGUMENTS" value="C:\Users\cyv\dev\iva\testcases\sample_image_1.bmp C:\Users\cyv\dev\iva\iva"/>
 <stringAttribute key="org.eclipse.jdt.launching.PROJECT_ATTR" value="iva"/>
 </launchConfiguration>

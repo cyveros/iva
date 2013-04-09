@@ -30,8 +30,8 @@ public class line_detection {
 		double yTemp = 0;
 		ArrayList<Point> temp = new ArrayList<Point>();
 		//store the (x, y) in a list
-		for (int i = 0; i < height; i++){
-			for (int j = 0; j < width; j++){
+		for (int i = 1; i < height - 3; i++){
+			for (int j = 0; j < width - 3; j++){
 				if(gridNoise[i][j]){
 					hPoints.add(new Point(i,j));
 				}
@@ -174,14 +174,7 @@ public class line_detection {
 		
 		line_detection ld = new line_detection(test, 20, 20);
 		
-		ArrayList<Point> lp = ld.getHorizontalLine();
-		
-		int index = 0;
-		for(Point p: lp){
-			
-			System.out.println(index + " " + p.getX() + " " + p.getY());
-			index++;
-		}
+		ArrrayList<Point> lp = ld.getHorizontalLine();
 		
 	}
 	

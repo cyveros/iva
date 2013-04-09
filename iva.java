@@ -1,9 +1,8 @@
+
 import java.awt.*;
-import java.awt.event.*;
 import java.awt.image.*;
 import java.io.*;
 import javax.imageio.*;
-import java.math.*;
 
 public class iva {
           
@@ -40,6 +39,7 @@ public class iva {
     // factor
     private final double upper = 1.25, lower = 0.75;
     
+    String outputPath;
     
     public iva(String imgPath){
 		try {
@@ -969,7 +969,7 @@ public class iva {
 	
 	public void outputImage(String fileName, String type){
 		try {
-			File f = new File(".." + File.separator + "o" + File.separator + fileName);
+			File f = new File(outputPath + File.separator + "o" + File.separator + fileName);
 			ImageIO.write(img, type, f);
 		} catch (IOException e){
 			e.printStackTrace();
@@ -989,6 +989,17 @@ public class iva {
 	public void setImage(BufferedImage img){
 		this.img = img;
 		getProperties();
+	}
+	
+	public void setOutputPath(String outputPath){
+		
+		this.outputPath = outputPath;
+		
+	}
+	
+	public void shape(){
+		
+		
 	}
 
 }

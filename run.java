@@ -1,18 +1,19 @@
-import java.awt.*;
-import java.awt.event.*;
-import java.awt.image.*;
-import java.io.*;
-import javax.imageio.*;
-import java.math.*;
-
 public class run {
 	
 	public static void main(String[] args){
 		String imgPath = args[0];
+		String outputPath = "";
 		
+		if (args.length > 1)
+			outputPath = args[1];
+
 		// port from cpp source code
 		// create iva object
 		iva image = new iva(imgPath);
+		
+		if (outputPath.length() > 1)
+			image.setOutputPath(outputPath);
+		
 		// perform basic configuration
 		image.preComputation();
 		

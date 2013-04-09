@@ -112,12 +112,13 @@ public class ivaApp extends Component{
         JLabel textLabel = new JLabel("I'm a label in the window",SwingConstants.CENTER);
         textLabel.setPreferredSize(new Dimension(300, 100));
         f.getContentPane().add(textLabel, BorderLayout.CENTER); 
-        
+        /*
         f.addWindowListener(new WindowAdapter(){
                 public void windowClosing(WindowEvent e) {
                     System.exit(0);
                 }
             });
+           */
 
         f.add(new ivaApp(bis));
         f.pack();

@@ -8,7 +8,7 @@ import java.util.Map.Entry;
 
 public class houghTransform {
 	private Map<Point, double[]> accumulator;
-	private final int SINGLETON_LENGTH = 181, INCREMENT_STEP = 4;
+	private final int SINGLETON_LENGTH = 181, INCREMENT_STEP = 2;
 	
 	public houghTransform(){
 		// 36 division 2 deg per decade
@@ -102,7 +102,7 @@ public class houghTransform {
 	        	}	
 	        }
 	        
-	        //System.out.println(tmp.getX() + "\t" + tmp.getY() + "\t" + occurence);
+	        System.out.println(tmp.getX() + "\t" + tmp.getY() + "\t" + occurence);
 	        //it.remove(); // avoids a ConcurrentModificationException
 	    }
 	    
@@ -122,7 +122,7 @@ public class houghTransform {
 		
 		for (int j = 0; j < 10; j++){
 			
-				test[j][j] = true;
+				test[j][9 - j] = true;
 		}
 		
 		houghTransform ht = new houghTransform();

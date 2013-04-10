@@ -1,9 +1,4 @@
 import java.awt.*;
-import java.awt.event.*;
-import java.awt.image.*;
-import java.io.*;
-import javax.imageio.*;
-import java.math.*;
 import java.util.ArrayList;
 
 public class line_detection { 

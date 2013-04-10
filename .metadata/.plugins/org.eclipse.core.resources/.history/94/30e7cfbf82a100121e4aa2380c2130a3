@@ -1,0 +1,68 @@
+import java.awt.Point;
+import java.security.KeyStore.Entry;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+
+
+public class houghTransform {
+	private Map<Point, double[]> accumulator;
+	private final int SINGLETON_LENGTH = 91, INCREMENT_STEP = 2;
+	
+	public houghTransform(){
+		// 36 division 2 deg per decade
+		accumulator = new HashMap<Point, double[]>();
+	}
+	
+	public void add(Point p, double[] singleton){
+		accumulator.put(p, singleton);
+		
+	}
+	
+	public double[] computeSingleton(Point p){
+		double[] d = new double[SINGLETON_LENGTH];
+		
+		for (int i = 0; i < SINGLETON_LENGTH; i += INCREMENT_STEP){
+			d[i] = p.getX() * Math.cos(i) + p.getY() * Math.sin(i);
+		}
+		
+		return d;
+	}
+	
+	public void accumulateData(boolean[][] data){
+		int width = data.length, height = data[0].length;
+		
+		for (int i = 0; i < width; i++){
+			for (int j = 0; j < height; j++){
+				if (data[i][j]){
+					Point p = new Point(i, j);
+					
+					add(p, computeSingleton(p));
+				}
+				
+			}
+		}
+	}
+	
+	public void vote(){
+		for(double[] d: accumulator.values()){
+			
+			
+		}
+		
+		/*
+		Iterator it = accumulator.values().iterator();
+		
+		while(it.hasNext()){
+			
+		}
+		*/
+		
+	}
+	
+	public static void main(String[] args){
+		
+
+		
+	}
+}

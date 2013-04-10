@@ -1,0 +1,20 @@
+import java.awt.Point;
+import java.util.ArrayList;
+
+
+public class houghTransform {
+	private ArrayList<double>[] data;
+	private ArrayList<Point> pointRegister;
+	private double rho, theta;
+	
+	
+	public houghTransform(){
+		// 36 division 5 deg per decade
+		data = new ArrayList<double>[36];
+	}
+	
+	public void add(){
+		
+		
+	}
+}

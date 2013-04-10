@@ -39,6 +39,8 @@ public class run {
 		image.lineDrawComplete();
 		System.out.println("Stage 7 - Line draw complete");
 		
+		image.shape();
+		System.out.println("Stage 6 - Image shape complete");
 		// shape detection
 		
 		

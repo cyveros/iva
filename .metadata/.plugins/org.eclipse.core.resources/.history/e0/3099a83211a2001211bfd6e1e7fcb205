@@ -1,0 +1,24 @@
+import java.awt.Point;
+
+
+public class lineVector {
+	private Point p;
+	private int x, y, width, height;
+	
+	public lineVector(Point polar, int x, int y, int width, int height){
+		
+		this.p = polar;
+		this.x = x;
+		this.y = y;
+		this.width = width;
+		this.height = height;
+		
+	}
+	
+	public Point[] getBoundaryCoordinates(){
+		Point[] ps = new Point[2];
+		
+		
+		return ps;
+	}
+}

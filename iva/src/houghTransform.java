@@ -1,11 +1,14 @@
 import java.awt.Point;
+import java.text.DecimalFormat;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 
 public class houghTransform {
 	private Map<Point, double[]> accumulator;
-	private final int SINGLETON_LENGTH = 181, INCREMENT_STEP = 5;
+	private final int SINGLETON_LENGTH = 181, INCREMENT_STEP = 4;
 	
 	public houghTransform(){
 		// 36 division 2 deg per decade
@@ -43,27 +46,92 @@ public class houghTransform {
 		}
 	}
 	
-	public int vote(){
-		double[][] fusion = new double[accumulator.size()][(SINGLETON_LENGTH - 1)/INCREMENT_STEP];
+	// d = x cos(theta) + y sin(theta)
+	// perfect result for horizontal line where d = y
+	// twisted result for vertical line where d = x (so all possible x must be in side the range but line segment is undetectable)
+	// diagonal VBD
+	// return (0, 0) if not found any
+	public Point vote(){
+		int rowSize = accumulator.size(), columnSize = (SINGLETON_LENGTH - 1)/INCREMENT_STEP;
 		int index = 0;
-		int retval = -1;
 		
+		Map<Point, Integer> m = new HashMap<Point, Integer>();
+		// compare and find the mostly likely hough trasnform angle in degree for the section
+		// how to vote? find the angle whose rho occurrence is the highest
+		// given step of 5 deg, total 36 division
+		// we need to take care all data of row above and below
+		// H(d, theta) += 1 if for given value d != 0 and angle theta, we had a occurence in the table
 		for(double[] d: accumulator.values()){
-			for(int i = 0; i < fusion[0].length; i++){
-				fusion[index][i] = d[i];
+			for(int i = 0; i < columnSize; i++){
+				int distance = (int)Math.round(d[i]);
+
+				if (distance == 0)
+					continue;
+				
+				Point key = new Point(distance, i * INCREMENT_STEP);
+				
+				if (m.containsKey(key)){
+					m.put(key, m.get(key) + 1);
+				}else{
+					m.put(key, 1);
+				}
 			}
 			
 			index++;
 		}
 		
-		// compare and find the mostly likely hough trasnform angle in degree for the section
+		Iterator<Entry<Point, Integer>> it = m.entrySet().iterator();
+		int max = 0;
+		Point candidateKey = new Point(0, 0);
 		
-		return retval;
+	    while (it.hasNext()) {
+	        Entry<Point, Integer> pairs = it.next();
+	        Point tmp = (Point)pairs.getKey();
+	        int occurence = pairs.getValue();
+	        
+	        if (occurence >= max){
+	        	if (occurence == max){
+	        		// try to pick the result which is more or less parallel with x-axis
+	        		if ((candidateKey.getY() > 90  && tmp.getY() > candidateKey.getY()) || (candidateKey.getY() < 90  && tmp.getY() < candidateKey.getY())){
+	        			occurence = max;
+	        			candidateKey.setLocation(tmp); 
+	        		}
+	        	}else{
+	        		max = occurence;
+	        		candidateKey.setLocation(tmp); 
+	        	}	
+	        }
+	        
+	        //System.out.println(tmp.getX() + "\t" + tmp.getY() + "\t" + occurence);
+	        //it.remove(); // avoids a ConcurrentModificationException
+	    }
+	    
+	    if (max < 2){
+	    	// we need to vote again with additional criteria
+	    	// further work
+	    	
+	    	
+	    }
+	    
+		return candidateKey;
 	}
 	
 	public static void main(String[] args){
 		
-
+		boolean[][] test = new boolean[10][10];
+		
+		for (int j = 0; j < 10; j++){
+			
+				test[j][j] = true;
+		}
+		
+		houghTransform ht = new houghTransform();
+		
+		ht.accumulateData(test);
+		
+		Point target = ht.vote();
+		
+		System.out.println(target.getX() + " " + target.getY());
 		
 	}
 }

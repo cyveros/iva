@@ -2,6 +2,8 @@
 import java.awt.*;
 import java.awt.image.*;
 import java.io.*;
+import java.util.ArrayList;
+
 import javax.imageio.*;
 
 public class iva {
@@ -23,7 +25,7 @@ public class iva {
 						gridColorNoise,
 						gridCenterSurroundNoise;
 						
-	private boolean[][] gridRed, gridGreen, gridBlue, gridYellow;
+	private boolean[][] gridRed, gridGreen, gridBlue, gridYellow, gridBoolean;
 	private boolean[][] gridVerticalJet,
 						gridHorizontalJet,
 						gridDiagonalJet;
@@ -126,12 +128,13 @@ public class iva {
 	}
 	
 	public void getGrid(){
-		for(int i = 0; i < height; i++){
-			for (int j = 0; j < width; j++){
-				gridBlue[j][i] = getRGB(j, i, BLUE) != BLUE;
-				gridGreen[j][i] = getRGB(j, i, GREEN) != GREEN;
-				gridRed[j][i] = getRGB(j, i, RED) != RED;
-				gridYellow[j][i] = getRGB(j, i, YELLOW) != YELLOW;
+		for(int i = 0; i < width; i++){
+			for (int j = 0; j < height; j++){
+				gridBlue[i][j] = getRGB(i, j, BLUE) != BLUE;
+				gridGreen[i][j] = getRGB(i, j, GREEN) != GREEN;
+				gridRed[i][j] = getRGB(i, j, RED) != RED;
+				gridYellow[i][j] = getRGB(i, j, YELLOW) != YELLOW;
+				gridBoolean[i][j] = ! (gridBlue[i][j] && gridGreen[i][j] && gridYellow[i][j]);
 			}
 		}
 	}
@@ -172,16 +175,22 @@ public class iva {
 		gridColorNoise 			= new boolean[width][height];
 		gridCenterSurroundNoise = new boolean[width][height];
 		
-		imageFeaturesOld = new int[3][9];
-		imageFeatures = new int[3][9]; 
+		imageFeaturesOld 		= new int[3][9];
+		imageFeatures 			= new int[3][9]; 
 		
-		verticalLines = new int[1000][4];
-		horizontalLines = new int[1000][4];
+		verticalLines 			= new int[1000][4];
+		horizontalLines 		= new int[1000][4];
 		
 		// initialize jet vectors
 		gridVerticalJet 		= new boolean[width][height];
 		gridHorizontalJet 		= new boolean[width][height];
 		gridDiagonalJet 		= new boolean[width][height];
+		
+		gridRed 				= new boolean[width][height];
+		gridGreen 				= new boolean[width][height];
+		gridBlue 				= new boolean[width][height];
+		gridYellow 				= new boolean[width][height];
+		gridBoolean 			= new boolean[width][height];
 	}
 	
 	public int getWidth(){
@@ -997,9 +1006,64 @@ public class iva {
 		
 	}
 	
-	public void shape(){
+	public ArrayList<lineVector> shape(){
+		// convert color bitmap into 2D boolean array
+		getGrid();
 		
+		int sliceSize = 32;
+		ArrayList<lineVector> ap = new ArrayList<lineVector>();
 		
+		// partition the image into sliceSizexsliceSize blocks and
+		for (int i = 0; i < width/sliceSize + 1; i++){
+			for (int j = 0; j < height/sliceSize + 1; j++){
+				boolean[][] tmp;
+				Point polar;
+				lineVector lv;
+				houghTransform ht = new houghTransform();
+				
+				if ((i + 1) * sliceSize <= width && (j + 1) * sliceSize <= height){
+					tmp = arraySlice(i * sliceSize, sliceSize, j * sliceSize, sliceSize, gridBoolean);
+					ht.accumulateData(tmp);
+					polar = ht.vote();
+					lv = new lineVector(polar, i * sliceSize, sliceSize, j * sliceSize, sliceSize);
+					
+				}else if ((i + 1) * sliceSize <= width && (j + 1) * sliceSize > height){
+					tmp = arraySlice(i * sliceSize, sliceSize, j * sliceSize, height - j * sliceSize, gridBoolean);
+					ht.accumulateData(tmp);
+					polar = ht.vote();
+					lv = new lineVector(polar, i * sliceSize, sliceSize, j * sliceSize, height - j * sliceSize);
+				}else if ((i + 1) * sliceSize > width && (j + 1) * sliceSize <= height){
+					tmp = arraySlice(i * sliceSize, width - i * sliceSize, j * sliceSize, sliceSize, gridBoolean);
+					ht.accumulateData(tmp);
+					polar = ht.vote();
+					lv = new lineVector(polar, i * sliceSize, width - i * sliceSize, j * sliceSize, sliceSize);
+				}else{
+					tmp = arraySlice(i * sliceSize, width - i * sliceSize, j * sliceSize, height - j * sliceSize, gridBoolean);
+					ht.accumulateData(tmp);
+					polar = ht.vote();
+					lv = new lineVector(polar, i * sliceSize, width - i * sliceSize, j * sliceSize, height - j * sliceSize);
+				}
+				
+				// same everything as line vector
+				ap.add(lv);
+			}
+		}
+		
+		return ap;
+	}
+	
+	public boolean[][] arraySlice(int startX, int widthX, int startY, int heightY, boolean[][] b){
+		//System.out.println(startX + " " + widthX + " " + startY + " " + heightY);
+		
+		boolean[][] retval = new boolean[widthX][heightY];
+		
+		for (int i = startX; i < startX + widthX; i++){
+			for (int j = startY; j < startY + heightY; j++){
+				retval[i - startX][j - startY] = b[i][j];
+			}
+		}
+		
+		return retval;
 	}
 
 }

@@ -101,12 +101,12 @@ public class line_detection {
 							for(int k = 0; k < temp2.size(); k++){
 								temp1 = temp2.get(k);
 								
-								if(temp1.isEmpty()){
+								/*if(temp1.isEmpty()){
 									temp1.add(new Point(i,j));
 								}
 								
 								else{
-									
+									*/
 									int l = temp1.size() - 1;
 									xTemp = i - temp1.get(l).getX();
 									yTemp = j - temp1.get(l).getY();

@@ -1,7 +1,0 @@
-
-public class lineVector {
-	public lineVector(Point p, int x, int y, int size){
-		
-		
-	}
-}

@@ -44,6 +44,8 @@ public class iva {
     String outputPath;
     
     public iva(String imgPath){
+    	
+    	System.out.println(System.getProperty("user.dir"));
 		try {
 			img = ImageIO.read(new File(imgPath));
 			getProperties();

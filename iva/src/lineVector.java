@@ -23,7 +23,21 @@ public class lineVector {
 		bc[0] = -1 * Math.cos(Math.toRadians(p.getY())) / Math.sin(Math.toRadians(p.getY())); // m
 		bc[1] = p.getX() / Math.sin(Math.toRadians(p.getY())); // b
 		
-		// intersect points
+		// intersect points using line segment intersect algorithm
+		// in a square subsection, we will have 2 intersect points
+		int x1 = x, x2 = x + width;
+		int y1 = y, y2 = y + height;
+		
+		bc[2] = 0;
+		bc[3] = 0;
+		// 2nd intersect point
+		bc[4] = 0;
+		bc[5] = 0;
+		// find intersect
+		//
+		//if (bc[0] * x1 + bc[1] <= x + width && bc[0] * x1 + bc[1] > x)
+		
+		
 		// need to work out
 		
 		

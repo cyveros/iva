@@ -1,5 +1,6 @@
 import java.awt.Point;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -122,7 +123,7 @@ public class houghTransform {
 		
 		for (int j = 0; j < 10; j++){
 			
-				test[j][9 - j] = true;
+				test[4][j] = true;
 		}
 		
 		houghTransform ht = new houghTransform();

@@ -36,16 +36,19 @@ public class run {
 		image.colorImageComplete();
 		System.out.println("Stage 6 - Image Coloring complete");
 		
-		image.lineDrawComplete();
-		System.out.println("Stage 7 - Line draw complete");
+		image.dNoiseFilter();
+		System.out.println("Stage Z - Diagonal Filter");
 		
-		image.shape();
-		System.out.println("Stage 6 - Image shape complete");
+		//image.lineDrawComplete();
+		//System.out.println("Stage 7 - Line draw complete");
+		
+		//image.shape();
+		//System.out.println("Stage 6 - Image shape complete");
 		// shape detection
 		
 		
-		image.imageJet();
-		System.out.println("Stage X - Image jet complete");
+		//image.imageJet();
+		//System.out.println("Stage X - Image jet complete");
 		
 	}
 }

@@ -55,6 +55,7 @@ public class iva {
 		}
 	}
     
+    
     public iva(BufferedImage img){
 		this.img = img;
 		getProperties();
@@ -987,6 +988,15 @@ public class iva {
 		} 
 	}
 	
+	public void outputImage(String fileName, String type, BufferedImage im){
+		try {
+			File f = new File(outputPath + File.separator + "o" + File.separator + fileName);
+			ImageIO.write(im, type, f);
+		} catch (IOException e){
+			e.printStackTrace();
+		} 
+	}
+	
 	public void preComputation(){
 		// pre computation steps
 		computeMean();
@@ -1068,56 +1078,112 @@ public class iva {
 		return retval;
 	}
 	
-	public boolean[][] dNoiseFilter(){
+	
+	public void dNoiseFilter(){
 		//retrieve diagonal noise
-		boolean[][]	temp = getGridYellow();
-		getGrid();
+		boolean[][]	temp = gridDiagonalNoise;
 		int h = getHeight();
 		int w = getWidth();	
 		boolean[][] temp2 = new boolean[w][h];
-		int counter = 0;
+		
+		//int counter = 0;
 
 		//computer the average true value per pixel
-		for (int i = 0; i < w; i++){
-			for (int j = 0; j < h; j++){
-				if (temp[i][j] = true)
-					counter++;
-			}
-		}
+		//for (int i = 0; i < w; i++){
+			//for (int j = 0; j < h; j++){
+				//if (temp[i][j])
+					//counter++;
+			//}
+		//}
 
-		
+		//System.out.println(counter);
 		//split the grid into smaller grids so each one will have one true value in it on average
-		int sH = h/counter;
-		int sW = w/counter;
+		int sH = 3;
+		int sW = 3;
+		//System.out.println(sH + " " + sW);
 		
 
 		
 		//represent each small grid with only one value in the middle of the grid
+		
 		int tH = 0;
+		//System.out.println(w + " " + h);
+		while(tH < h){
+		
 		int tW = 0;
-		do{
-		do{
+		
+		while(tW < w){
 			int count = 0;
-			for (int m = tW; m < sW; m++){
-				for (int n = tH; n < tH; n++){
-					if (temp[m][n] = true)
+
+			for (int m = tH; m < tH + sH ; m++){
+				for (int n = tW; n < tW + sW; n++){
+					//System.out.println(temp[m][n]);
+					if (temp[n][m])
 						count++;
+						//System.out.println(count);
+					
 				}
+				
 			}
-			if (count > 1){
+			//System.out.println(count);
+			if (count > 2){
 				temp2[tW + sW/2][tH + sH/2] = true;
+				
 			}
+
 			
 			tW = tW + sW;
+			//System.out.println(tW + " " + w);
+			//System.out.println("shiet happens");
 			
-		} while(tW < w);
+		} 
 		
 		tH = tH + sH;
-		} while(tH < h);
+		//System.out.println(tH + " " + h);
+		//System.out.println("shiet happens again");
+		}
 			
-		return temp2;
+		for (int i = 3; i < w - 3; i++){
+			for (int j = 3; j < h - 3; j++){
+				if (temp2[i][j]){
+					if (temp2[i+3][j+3]){
+						temp2[i+1][j+1] = true;
+						temp2[i+2][j+2] = true;
+					}
+					if (temp2[i-3][j+3]){
+						temp2[i-1][j+1] = true;
+						temp2[i-2][j+2] = true;
+					}
+				}
+				
+			}
+		}
+		
+		
+		
+		
+		
+		
 		//convert this matrix back to image
+	
+		for (int i = 0; i < w; i++)
+			for (int j = 0; j < h; j++)
+				setColor(i, j, BLACK);
+		
+
+		for (int i = 0; i < w - 2; i++){
+			for (int j = 0; j < h - 2; j++){
+				if (temp2[i][j]) setColor(i, j, YELLOW);
+				else if (gridHorizontalNoise[i][j]) setColor(i, j, BLUE);
+				else if (gridVerticalNoise[i][j]) setColor(i, j, GREEN);
+			}
+		}
+		
+		outputImage("diagonalNoiseFilter.png", "PNG");
+		
 	}
+	
+	
 	
 
 }

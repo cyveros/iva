@@ -107,6 +107,7 @@ public class line_detection {
 								
 								else{
 									*/
+								
 									int l = temp1.size() - 1;
 									xTemp = i - temp1.get(l).getX();
 									yTemp = j - temp1.get(l).getY();

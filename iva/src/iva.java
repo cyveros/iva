@@ -1067,7 +1067,59 @@ public class iva {
 		
 		return retval;
 	}
+	
+	public boolean[][] dNoiseFilter(){
+		//retrieve diagonal noise
+		boolean[][]	temp = getGridYellow();
+		getGrid();
+		int h = getHeight();
+		int w = getWidth();	
+		boolean[][] temp2 = new boolean[w][h];
+		int counter = 0;
+		double avg;
+		
+		//computer the average true value per pixel
+		for (int i = 0; i < w; i++){
+			for (int j = 0; j < h; j++){
+				if (temp[i][j] = true)
+					counter++;
+			}
+		}
+		avg = counter/(h*w);
+		
+		//split the grid into smaller grids so each one will have one true value in it on average
+		int sH = (int) (h*avg);
+		int sW = (int) (w*avg);
+		
+
+		
+		//represent each small grid with only one value in the middle of the grid
+		int tH = 0;
+		int tW = 0;
+		do{
+			int count = 0;
+			for (int m = tW; m < sW; m++){
+				for (int n = tH; n < tH; n++){
+					if (temp[m][n] = true)
+						count++;
+				}
+			}
+			if (count > 1){
+				temp2[tW + sW/2][tH + sH/2] = true;
+			}
+			
+			tH = tH + sH;
+			tW = tW + sW;
+			
+		} while(tH > h && tW > w);
+			
+		return temp2;
+		//convert this matrix back to image
+	}
+	
 
 }
+
+	
 
 

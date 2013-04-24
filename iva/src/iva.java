@@ -1082,24 +1082,20 @@ public class iva {
 	public void dNoiseFilter(){
 		//retrieve diagonal noise
 		boolean[][]	temp = gridDiagonalNoise;
+		boolean[][]	temp3 = gridVerticalNoise;
+		boolean[][]	temp5 = gridHorizontalNoise;
 		int h = getHeight();
 		int w = getWidth();	
 		boolean[][] temp2 = new boolean[w][h];
-		
-		//int counter = 0;
+		boolean[][] temp4 = new boolean[w][h];
+		boolean[][] temp6 = new boolean[w][h];
+		int[][] temp7 = new int[w][h];
 
-		//computer the average true value per pixel
-		//for (int i = 0; i < w; i++){
-			//for (int j = 0; j < h; j++){
-				//if (temp[i][j])
-					//counter++;
-			//}
-		//}
 
-		//System.out.println(counter);
-		//split the grid into smaller grids so each one will have one true value in it on average
-		int sH = 3;
-		int sW = 3;
+
+		//split the grid into smaller grids
+		int sH = h/100;
+		int sW = w/100;
 		//System.out.println(sH + " " + sW);
 		
 
@@ -1114,24 +1110,55 @@ public class iva {
 		
 		while(tW < w){
 			int count = 0;
+			int count2 = 0;
+			int count3 = 0;
 
-			for (int m = tH; m < tH + sH ; m++){
-				for (int n = tW; n < tW + sW; n++){
+			for (int m = tH; (m < tH + sH)&&(m < h) ; m++){
+				for (int n = tW; (n < tW + sW)&&(n < w); n++){
 					//System.out.println(temp[m][n]);
 					if (temp[n][m])
 						count++;
 						//System.out.println(count);
+					if (temp3[n][m])
+						count2++;
 					
+					if (temp5[n][m])
+						count3++;
 				}
 				
 			}
 			//System.out.println(count);
 			if (count > 2){
-				temp2[tW + sW/2][tH + sH/2] = true;
-				
+				if ( ((tW + sW/2) < w) && ((tH + sH/2) < h))
+					temp2[tW + sW/2][tH + sH/2] = true;
 			}
-
-			
+				
+			if (count2 > 1){
+				if ( ((tW + sW/2) < w) && ((tH + sH/2) < h))
+					temp4[tW + sW/2][tH + sH/2] = true;
+			}
+				
+			if (count3 > 1){
+				if ( ((tW + sW/2) < w) && ((tH + sH/2) < h))
+					temp6[tW + sW/2][tH + sH/2] = true;
+			}
+			/*
+			if ( ((tW + sW/2) < w) && ((tH + sH/2) < h)){
+				if ( (Math.max(count3,count2) == count2) ){
+					if ( (Math.max(count2, count) == count) ){
+						temp7[tW + sW/2][tH + sH/2] = 1;
+					}
+					else if (Math.max(count2, count) == count2) {
+						
+							temp7[tW + sW/2][tH + sH/2] = 2;
+					}	
+				}
+				else if (Math.max(count3, count2) == count3){
+					
+						temp7[tW + sW/2][tH + sH/2] = 3;
+				}
+			}
+			*/
 			tW = tW + sW;
 			//System.out.println(tW + " " + w);
 			//System.out.println("shiet happens");
@@ -1142,27 +1169,37 @@ public class iva {
 		//System.out.println(tH + " " + h);
 		//System.out.println("shiet happens again");
 		}
-			
-		for (int i = 3; i < w - 3; i++){
-			for (int j = 3; j < h - 3; j++){
+		
+		//make points more concentrated
+		
+		for (int i = sW; i < w - sW; i++){
+			for (int j = sH; j < h - sH; j++){
 				if (temp2[i][j]){
-					if (temp2[i+3][j+3]){
-						temp2[i+1][j+1] = true;
-						temp2[i+2][j+2] = true;
+					if (temp2[i+sW][j-sH]){
+						temp2[i+sW/2][j-sH/2] = true;
 					}
-					if (temp2[i-3][j+3]){
-						temp2[i-1][j+1] = true;
-						temp2[i-2][j+2] = true;
+					
+					if (temp2[i-sW][j+sH]){
+						temp2[i-sW/2][j+sH/2] = true;
 					}
+					
+					
+					if (temp2[i+sW][j+sH]){
+						temp2[i+sW/2][j+sH/2] = true;
+					}
+					
+					if (temp2[i-sW][j-sH]){
+						temp2[i-sW/2][j-sH/2] = true;
+
+					}
+					
 				}
 				
 			}
 		}
 		
 		
-		
-		
-		
+
 		
 		//convert this matrix back to image
 	
@@ -1173,9 +1210,24 @@ public class iva {
 
 		for (int i = 0; i < w - 2; i++){
 			for (int j = 0; j < h - 2; j++){
+				/*
+				if (temp7[i][j] == 1)
+					setColor(i, j, YELLOW);
+				if (temp7[i][j] == 2)
+					setColor(i, j, GREEN);
+				if (temp7[i][j] == 3)
+					setColor(i, j, BLUE);
+				*/
+				
 				if (temp2[i][j]) setColor(i, j, YELLOW);
-				else if (gridHorizontalNoise[i][j]) setColor(i, j, BLUE);
-				else if (gridVerticalNoise[i][j]) setColor(i, j, GREEN);
+				
+				if (temp4[i][j]) setColor(i, j, GREEN);
+				
+				if (temp6[i][j]) setColor(i, j, BLUE);
+				
+				
+				//else if (gridHorizontalNoise[i][j]) setColor(i, j, BLUE);
+				//else if (gridVerticalNoise[i][j]) setColor(i, j, GREEN);
 			}
 		}
 		

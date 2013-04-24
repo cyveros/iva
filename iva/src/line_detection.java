@@ -88,8 +88,8 @@ public class line_detection {
 			ArrayList<Point> temp1 = new ArrayList<Point>();
 
 			//split the (x, y) to portions
-			for (int i = 0; i < width - 3; i++){
-				for (int j = 1; j < height - 3; j++){
+			for (int i = 0; i < width; i++){
+				for (int j = 0; j < height; j++){
 					if(gridNoise[i][j]){
 						
 						if (temp2.isEmpty()){
@@ -126,7 +126,7 @@ public class line_detection {
 						}
 					}
 				}
-			}
+			
 		//find linear regression of each set of points	
 			for (int n = 0; n < temp2.size(); n++){
 				dLines.add(computeLine(temp2.get(n)));

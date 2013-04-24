@@ -25,8 +25,10 @@ public class lineVector {
 		
 		// intersect points using line segment intersect algorithm
 		// in a square subsection, we will have 2 intersect points
-		int x1 = x, x2 = x + width;
-		int y1 = y, y2 = y + height;
+		//int x1 = x, x2 = x + width;
+		//int y1 = y, y2 = y + height;
+		int cursor = 0;
+		int intersectCount = 0;
 		
 		bc[2] = 0;
 		bc[3] = 0;
@@ -34,11 +36,69 @@ public class lineVector {
 		bc[4] = 0;
 		bc[5] = 0;
 		// find intersect
-		//
-		//if (bc[0] * x1 + bc[1] <= x + width && bc[0] * x1 + bc[1] > x)
-		
-		
-		// need to work out
+		// left
+		while (intersectCount < 2){
+			// left
+			if (cursor == 0){
+				if (bc[0] * x + bc[1] <= y + height && bc[0] * x + bc[1] >= y){
+					if (intersectCount == 0){
+						bc[2] = x;
+						bc[3] = bc[0] * x + bc[1];
+					}else{
+						bc[4] = x;
+						bc[5] = bc[0] * x + bc[1];
+					}
+					
+					intersectCount++;
+				}
+				
+				cursor++;
+				
+			}else if(cursor == 1){ // bottom
+				if ((y - bc[1])/ bc[0] <= x + width && (y - bc[1])/ bc[0] >= x){
+					if (intersectCount == 0){
+						bc[2] = (y - bc[1])/ bc[0];
+						bc[3] = y;
+					}else{
+						bc[4] = (y - bc[1])/ bc[0];
+						bc[5] = y;
+					}
+					
+					intersectCount++;
+				}
+				
+				cursor++;
+			}else if(cursor == 2){ // right
+				if (bc[0] * (x + width) + bc[1] <= y + height && bc[0] * (x + width) + bc[1] >= y){
+					if (intersectCount == 0){
+						bc[2] = (x + width);
+						bc[3] = bc[0] * (x + width) + bc[1];
+					}else{
+						bc[4] = (x + width);
+						bc[5] = bc[0] * (x + width) + bc[1];
+					}
+					
+					intersectCount++;
+				}
+				
+				cursor++;
+			}else{ // top
+				if ((y + height - bc[1])/ bc[0] <= x + width && (y + height - bc[1])/ bc[0] >= x){
+					if (intersectCount == 0){
+						bc[2] = (y + height - bc[1])/ bc[0];
+						bc[3] = y + height;
+					}else{
+						bc[4] = (y + height - bc[1])/ bc[0];
+						bc[5] = y + height;
+					}
+					
+					intersectCount++;
+				}
+				
+				cursor++;
+			}
+			
+		}
 		
 		
 		return bc;

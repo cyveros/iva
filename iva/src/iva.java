@@ -1171,7 +1171,7 @@ public class iva {
 		}
 		
 		//make points more concentrated
-		
+		/*
 		for (int i = sW; i < w - sW; i++){
 			for (int j = sH; j < h - sH; j++){
 				if (temp2[i][j]){
@@ -1197,7 +1197,7 @@ public class iva {
 				
 			}
 		}
-		
+		*/
 		
 
 		
@@ -1219,15 +1219,15 @@ public class iva {
 					setColor(i, j, BLUE);
 				*/
 				
-				if (temp2[i][j]) setColor(i, j, YELLOW);
+				if (temp2[i][j]) setColor(i, j, GREEN);
 				
-				if (temp4[i][j]) setColor(i, j, GREEN);
+				else if (temp4[i][j]) setColor(i, j, YELLOW);
 				
-				if (temp6[i][j]) setColor(i, j, BLUE);
+				else if (temp6[i][j]) setColor(i, j, BLUE);
 				
 				
 				//else if (gridHorizontalNoise[i][j]) setColor(i, j, BLUE);
-				//else if (gridVerticalNoise[i][j]) setColor(i, j, GREEN);
+				//else if (gridVerticalNoise[i][j]) setColor(i, j, YELLOW);
 			}
 		}
 		
